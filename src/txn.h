@@ -5,11 +5,7 @@
 
 #include "blake2b.h"
 
-#ifdef TARGET_NANOS
-#define MAX_ELEMS 20
-#else
 #define MAX_ELEMS 128
-#endif
 
 // macros for converting raw bytes to uint64_t
 #define U8BE(buf, off) \
