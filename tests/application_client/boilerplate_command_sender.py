@@ -38,7 +38,7 @@ class InsType(IntEnum):
 
 class Errors(IntEnum):
     SW_OK = 0x9000
-    SW_INVALID_PARAM = 0x681
+    SW_INVALID_PARAM = 0x6B01
 
     SW_DENY = 0x6985
     SW_WRONG_P1P2 = 0x6A86
