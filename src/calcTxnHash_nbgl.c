@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
 #include <ux.h>
 
 #include "blake2b.h"
@@ -35,12 +36,24 @@ static void confirm_callback(bool confirm) {
     }
 }
 
+txnElemType_e element_type(const txn_state_t *const txn, uint8_t pairIndex) {
+    if (txn->lastSiacoinOutputIndex != USHRT_MAX &&
+        (pairIndex / 2) <= txn->lastSiacoinOutputIndex) {
+        return TXN_ELEM_SC_OUTPUT;
+    } else if (txn->lastSiafundOutputIndex != USHRT_MAX &&
+               (pairIndex / 2) <= txn->lastSiafundOutputIndex) {
+        return TXN_ELEM_SF_OUTPUT;
+    }
+    return TXN_ELEM_MINER_FEE;
+}
+
 static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
     static nbgl_contentTagValue_t contentTagValue = {0};
     txn_state_t *txn = &ctx->txn;
     uint8_t valLen = 0;
+    uint16_t lastOutputIndex = 0;
 
-    switch (txn->elements[ctx->elementIndex].elemType) {
+    switch (element_type(txn, pairIndex)) {
         case TXN_ELEM_SC_OUTPUT:
             // For each siacoin output, the user needs to see both
             // the destination address and the amount.
@@ -55,8 +68,8 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
                 contentTagValue.item = "Amount (SC)";
                 contentTagValue.value = ctx->fullStr[1];
             }
+            contentTagValue.forcePageStart = false;
             break;
-
         case TXN_ELEM_SF_OUTPUT:
             // For each siacoin output, the user needs to see both
             // the destination address and the amount.
@@ -70,14 +83,24 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
                 contentTagValue.item = "Amount (SF)";
                 contentTagValue.value = ctx->fullStr[1];
             }
+            contentTagValue.forcePageStart = false;
             break;
 
         case TXN_ELEM_MINER_FEE:
-            ctx->elementIndex = pairIndex;
+            lastOutputIndex = txn->lastSiafundOutputIndex;
+            if (lastOutputIndex == USHRT_MAX) {
+                lastOutputIndex = txn->lastSiacoinOutputIndex;
+                if (lastOutputIndex == USHRT_MAX) {
+                    lastOutputIndex = 0;
+                }
+            }
+
+            ctx->elementIndex = pairIndex - 2 * lastOutputIndex;
             valLen = cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
             formatSC(ctx->fullStr[0], valLen);
             contentTagValue.item = "Miner Fee Amount (SC)";
             contentTagValue.value = ctx->fullStr[0];
+            contentTagValue.forcePageStart = true;
             break;
 
         default:
@@ -161,6 +184,11 @@ uint16_t handleCalcTxnHash(uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t
             // Computes the number of pairs to display
             contentTagValueList.nbPairs = 0;
             for (i = 0; i < ctx->txn.elementIndex; i++) {
+                if (ctx->txn.elements[i].elemType == TXN_ELEM_SC_OUTPUT) {
+                    ctx->txn.lastSiacoinOutputIndex = i;
+                } else if (ctx->txn.elements[i].elemType == TXN_ELEM_SF_OUTPUT) {
+                    ctx->txn.lastSiafundOutputIndex = i;
+                }
                 contentTagValueList.nbPairs +=
                     (ctx->txn.elements[i].elemType == TXN_ELEM_MINER_FEE) ? 1 : 2;
             }
