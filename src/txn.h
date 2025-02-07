@@ -5,17 +5,13 @@
 
 #include "blake2b.h"
 
-#ifdef TARGET_NANOS
-#define MAX_ELEMS 20
-#else
 #define MAX_ELEMS 128
-#endif
 
 // macros for converting raw bytes to uint64_t
 #define U8BE(buf, off) \
-    (((uint64_t)(U4BE(buf, off)) << 32) | ((uint64_t)(U4BE(buf, off + 4)) & 0xFFFFFFFF))
+    (((uint64_t) (U4BE(buf, off)) << 32) | ((uint64_t) (U4BE(buf, off + 4)) & 0xFFFFFFFF))
 #define U8LE(buf, off) \
-    (((uint64_t)(U4LE(buf, off + 4)) << 32) | ((uint64_t)(U4LE(buf, off)) & 0xFFFFFFFF))
+    (((uint64_t) (U4LE(buf, off + 4)) << 32) | ((uint64_t) (U4LE(buf, off)) & 0xFFFFFFFF))
 
 // txnDecoderState_e indicates a transaction decoder status
 typedef enum {
@@ -53,6 +49,10 @@ typedef struct {
     uint16_t pos;      // mid-decode offset; reset to 0 after each elem
 
     uint16_t elementIndex;
+#ifdef HAVE_NBGL
+    uint16_t lastSiacoinOutputIndex;
+    uint16_t lastSiafundOutputIndex;
+#endif
     txn_elem_t elements[MAX_ELEMS];  // only elements that will be displayed
 
     uint64_t sliceLen;    // most-recently-seen slice length prefix

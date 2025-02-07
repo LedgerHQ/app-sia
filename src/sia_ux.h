@@ -46,7 +46,6 @@ typedef struct {
     char labelStr[40];     // variable length
     char fullStr[2][128];  // variable length
     bool initialized;      // protects against certain attacks
-    bool finished;         // whether we have reached the end of the transaction
 } calcTxnHashContext_t;
 
 // To save memory, we store all the context types in a single global union,

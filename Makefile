@@ -30,7 +30,7 @@ APPNAME = "Sia"
 # Application version
 APPVERSION_M = 1
 APPVERSION_N = 0
-APPVERSION_P = 0
+APPVERSION_P = 1
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -38,10 +38,10 @@ APP_SOURCE_PATH += src
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
-ICON_NANOS = icons/nanos_app_sia.gif
 ICON_NANOX = icons/nanox_app_sia.gif
 ICON_NANOSP = icons/nanos2_app_sia.gif
 ICON_STAX = icons/stax_app_sia.gif
+ICON_FLEX = icons/flex_app_sia.gif
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
