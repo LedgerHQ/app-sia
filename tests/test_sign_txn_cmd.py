@@ -84,5 +84,5 @@ def test_sign_tx_accept(firmware: Firmware,
     response = client.get_async_response()
     assert response.status == Errors.SW_OK
     assert response.data == base64.b64decode(
-        "mr7i3aLQDoyHIM1ZXV+OTd34EM3bSpemN3tmV2ilH3x/yEVUtoZTVBMpuW8BMQ9vV21QIgxUGpzBfZccEY0bAg=="
+        "OGYqTPEpD8nzq4JikWhR7Aj3ixHtNOXBdl46H3nptQc7NweGYZxAJ4w48U2nGcgjFLXbBeC6fjOrrSQWAdiWBw=="
     )
