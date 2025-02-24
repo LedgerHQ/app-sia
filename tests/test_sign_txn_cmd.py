@@ -27,6 +27,7 @@ def __get_instructions(firmware: Firmware, refused: bool) -> List[NavInsID]:
         for _ in range(4):
             instructions.extend([NavInsID.RIGHT_CLICK])
             instructions.extend(2 * [NavInsID.BOTH_CLICK])
+        instructions.append(NavInsID.BOTH_CLICK)
 
         if refused:
             instructions.extend([NavInsID.RIGHT_CLICK])
