@@ -2,6 +2,7 @@
 
 #include <os.h>
 #include <string.h>
+#include <limits.h>
 
 #include "sia.h"  // For SW_DEVELOPER_ERR. Should be removed.
 
@@ -346,7 +347,12 @@ void txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex) {
     txn->sigIndex = sigIndex;
 
     txn->elementIndex = 0;
-    txn->elements[txn->elementIndex].elemType = -1;  // first increment brings it to SC_INPUT
+#ifdef HAVE_NBGL
+    txn->lastSiacoinOutputIndex = USHRT_MAX;
+    txn->lastSiafundOutputIndex = USHRT_MAX;
+#endif
+    txn->elements[txn->elementIndex].elemType =
+        TXN_ELEM_SC_INPUT - 1;  // first increment brings it to TXN_ELEM_SC_INPUT
 
     uint8_t publicKey[65] = {0};
     deriveSiaPublicKey(changeIndex, publicKey);
