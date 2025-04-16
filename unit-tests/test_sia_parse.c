@@ -100,6 +100,17 @@ static void test_formatSC_small(void **state) {
 
 static void test_formatSC_large(void **state) {
     (void) state;
+
+    char buf[255] = {0};
+    buf[0] = '1';
+    for (int i = 1; i < 26; i++) {
+        buf[i] = '7';
+    }
+    const int len = formatSC(buf, 26);
+
+    // Should result in: "17.777777777777777777777777 SC"
+    assert_int_equal(len, 27 + 1 + 2);
+    assert_string_equal(buf, "17.777777777777777777777777 SC");
 }
 
 int main(void) {
