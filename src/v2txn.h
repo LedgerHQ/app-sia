@@ -8,7 +8,7 @@
 void v2txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex);
 
 // v2txn_update adds data to a transaction decoder.
-void v2txn_update(txn_state_t *txn, uint8_t *in, uint8_t inlen);
+void v2txn_update(txn_state_t *txn, const uint8_t *in, uint8_t inlen);
 
 // v2txn_parse decodes the the transaction. If elements
 // is ready for display, txn_next_elem returns TXN_STATE_READY. If more data

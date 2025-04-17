@@ -77,7 +77,7 @@ typedef struct {
 void txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex);
 
 // txn_update adds data to a transaction decoder.
-void txn_update(txn_state_t *txn, uint8_t *in, uint8_t inlen);
+void txn_update(txn_state_t *txn, const uint8_t *in, uint8_t inlen);
 
 // txn_parse decodes the the transaction. If elements
 // is ready for display, txn_next_elem returns TXN_STATE_READY. If more data

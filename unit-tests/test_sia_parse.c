@@ -14,21 +14,12 @@ static void test_bin2hex(void **state) {
     (void) state;
 
     const uint8_t src[] = {0, 1, 2, 4, 8, 16, 32, 64, 128, 255};
-    char dst[2*sizeof(src) + 1];
+    char dst[2 * sizeof(src) + 1];
     bin2hex(dst, src, sizeof(src));
 
-    const char expected[2*sizeof(src)+1] = {
-        '0', '0',
-        '0', '1',
-        '0', '2',
-        '0', '4',
-        '0', '8',
-        '1', '0',
-        '2', '0',
-        '4', '0',
-        '8', '0',
-        'f', 'f',
-        '\0',
+    const char expected[2 * sizeof(src) + 1] = {
+        '0', '0', '0', '1', '0', '2', '0', '4', '0', '8',  '1',
+        '0', '2', '0', '4', '0', '8', '0', 'f', 'f', '\0',
     };
     assert_memory_equal(expected, dst, sizeof(expected));
 }
