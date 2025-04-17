@@ -41,8 +41,13 @@ string(REPLACE " " ";" COMPILATION_FLAGS ${COMPILATION_FLAGS_})
 
 include(extra/TxParser.cmake)
 
-add_executable(fuzz_tx_parser os_mocks.c fuzz_tx_parser.c)
+add_executable(fuzz_v1_parser os_mocks.c fuzz_v1_parser.c)
+add_executable(fuzz_v2_parser os_mocks.c fuzz_v2_parser.c)
 
-target_compile_options(fuzz_tx_parser PUBLIC ${COMPILATION_FLAGS})
-target_link_options(fuzz_tx_parser PUBLIC ${COMPILATION_FLAGS})
-target_link_libraries(fuzz_tx_parser PUBLIC txparser)
+target_compile_options(fuzz_v1_parser PUBLIC ${COMPILATION_FLAGS})
+target_link_options(fuzz_v1_parser PUBLIC ${COMPILATION_FLAGS})
+target_link_libraries(fuzz_v1_parser PUBLIC txparser)
+
+target_compile_options(fuzz_v2_parser PUBLIC ${COMPILATION_FLAGS})
+target_link_options(fuzz_v2_parser PUBLIC ${COMPILATION_FLAGS})
+target_link_libraries(fuzz_v2_parser PUBLIC txparser)

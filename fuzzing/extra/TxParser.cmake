@@ -47,6 +47,7 @@ add_library(txparser
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/sia_format.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/sia.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/txn.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/v2txn.c
 )
 
 set_target_properties(txparser PROPERTIES SOVERSION 1)
