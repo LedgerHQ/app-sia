@@ -75,7 +75,7 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
             break;
         case TXN_ELEM_SF_OUTPUT:
         case V2TXN_ELEM_SF_OUTPUT:
-            // For each siacoin output, the user needs to see both
+            // For each siafund output, the user needs to see both
             // the destination address and the amount.
             ctx->elementIndex = pairIndex / 2;
             if (pairIndex % 2 == 0) {
@@ -102,6 +102,8 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
                 lastOutputIndex++;
             }
 
+            // Figure out which element this miner fee is in the element array
+            // from the pairIndex
             ctx->elementIndex = pairIndex - lastOutputIndex;
             valLen = cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
             formatSC(ctx->fullStr[0], valLen);

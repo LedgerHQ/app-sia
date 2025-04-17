@@ -3,7 +3,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "format.h"
 #include "v2txn.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
