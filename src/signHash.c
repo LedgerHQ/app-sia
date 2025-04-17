@@ -26,6 +26,7 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 
 // Get a pointer to signHash's state variables. This is purely for
 // convenience, so that we can refer to these variables concisely from any

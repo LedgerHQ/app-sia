@@ -29,6 +29,7 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 
 // These are APDU parameters that control the behavior of the getPublicKey
 // command.

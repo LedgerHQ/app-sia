@@ -6,6 +6,7 @@
 #include <limits.h>
 
 #include "sia.h"
+#include "sia_format.h"
 
 static void need_at_least(txn_state_t *txn, uint64_t n) {
     if ((txn->buflen - txn->pos) < n) {

@@ -40,7 +40,7 @@ include_directories($ENV{BOLOS_SDK}/lib_standard_app)
 
 add_executable(test_sia_parse test_sia_parse.c)
 
-add_library(sia_format ../src/format.c)
+add_library(sia_format ../src/sia_format.c)
 
 target_link_libraries(test_sia_parse PUBLIC
                       cmocka

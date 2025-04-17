@@ -5,7 +5,7 @@
 #include <limits.h>
 
 #include "sia.h"  // For SW_DEVELOPER_ERR. Should be removed.
-#include "format.h"
+#include "sia_format.h"
 
 static void divWW10(uint64_t u1, uint64_t u0, uint64_t *q, uint64_t *r) {
     const uint64_t s = 60ULL;

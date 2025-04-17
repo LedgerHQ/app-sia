@@ -44,7 +44,7 @@ add_library(txparser
     ${BOLOS_SDK}/lib_cxng/src/cx_ram.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/blake2b.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/format.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/sia_format.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/sia.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/txn.c
 )

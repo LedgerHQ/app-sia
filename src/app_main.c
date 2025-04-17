@@ -130,9 +130,9 @@ static const nbgl_content_t contents[SETTING_CONTENTS_NB] = {
 static const nbgl_genericContents_t settingContents = {
     .callbackCallNeeded = false, .contentsList = contents, .nbContents = SETTING_CONTENTS_NB};
 
-static void controls_callback(int token, uint8_t index, int page) {
-    UNUSED(index);
-    UNUSED(page);
+static void controls_callback(int token,
+                              uint8_t index __attribute__((unused)),
+                              int page __attribute__((unused))) {
     if (token == BLIND_SIGNING_TOKEN) {
         toggle_blind_sign();
     }

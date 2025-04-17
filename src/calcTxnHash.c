@@ -31,6 +31,7 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 #include "txn.h"
 #include "v2txn.h"
 

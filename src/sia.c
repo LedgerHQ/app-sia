@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "blake2b.h"
-#include "format.h"
+#include "sia_format.h"
 
 static void siaSetPath(uint32_t index, uint32_t path[static 5]) {
     path[0] = 44 | 0x80000000;

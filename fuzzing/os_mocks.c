@@ -16,7 +16,7 @@ size_t strlcat(char *dst, const char *src, size_t Size) {
 
 // ignore so we don't crash when failin to generate key for change address
 // because we mock everything
-void assert_exit(bool confirm) {
+void assert_exit(bool confirm __attribute__((unused))) {
     // exit(-1);
 }
 
@@ -35,49 +35,56 @@ try_context_t *try_context_set(try_context_t *ctx) {
     return previous_ctx;
 }
 
-bolos_task_status_t os_sched_last_status(unsigned int task_idx) {
+bolos_task_status_t os_sched_last_status(unsigned int task_idx __attribute__((unused))) {
     return 1;
 }
 
-size_t cx_hash_get_size(const cx_hash_t *ctx) {
+size_t cx_hash_get_size(const cx_hash_t *ctx __attribute__((unused))) {
     return 32;
 }
 
-cx_err_t cx_sha256_init_no_throw(cx_sha256_t *hash) {
+cx_err_t cx_sha256_init_no_throw(cx_sha256_t *hash __attribute__((unused))) {
     return CX_OK;
 }
 
-cx_err_t cx_hash_no_throw(
-    cx_hash_t *hash, uint32_t mode, const uint8_t *in, size_t len, uint8_t *out, size_t out_len) {
+cx_err_t cx_hash_no_throw(cx_hash_t *hash __attribute__((unused)),
+                          uint32_t mode __attribute__((unused)),
+                          const uint8_t *in __attribute__((unused)),
+                          size_t len __attribute__((unused)),
+                          uint8_t *out __attribute__((unused)),
+                          size_t out_len __attribute__((unused))) {
     return CX_OK;
 }
 
-cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t size) {
+cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash __attribute__((unused)),
+                                  size_t size __attribute__((unused))) {
     return CX_OK;
 }
 
-cx_err_t cx_eddsa_get_public_key_no_throw(const cx_ecfp_private_key_t *pv_key,
-                                          cx_md_t hashID,
-                                          cx_ecfp_public_key_t *pu_key,
-                                          uint8_t *a,
-                                          size_t a_len,
-                                          uint8_t *h,
-                                          size_t h_len) {
+cx_err_t cx_eddsa_get_public_key_no_throw(const cx_ecfp_private_key_t *pv_key
+                                          __attribute__((unused)),
+                                          cx_md_t hashID __attribute__((unused)),
+                                          cx_ecfp_public_key_t *pu_key __attribute__((unused)),
+                                          uint8_t *a __attribute__((unused)),
+                                          size_t a_len __attribute__((unused)),
+                                          uint8_t *h __attribute__((unused)),
+                                          size_t h_len __attribute__((unused))) {
     pu_key->W_len = 65;
     memset(pu_key, 'A', pu_key->W_len);
     return CX_OK;
 }
 
-cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                cx_md_t hashID,
-                                const uint8_t *hash,
-                                size_t hash_len,
-                                uint8_t *sig,
-                                size_t sig_len) {
+cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey __attribute__((unused)),
+                                cx_md_t hashID __attribute__((unused)),
+                                const uint8_t *hash __attribute__((unused)),
+                                size_t hash_len __attribute__((unused)),
+                                uint8_t *sig __attribute__((unused)),
+                                size_t sig_len __attribute__((unused))) {
     return CX_OK;
 }
 
-cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length) {
+cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv __attribute__((unused)),
+                                       size_t *length __attribute__((unused))) {
     // Sia uses CX_CURVE_Ed25519
     if (cv == CX_CURVE_Ed25519) {
         *length = 32;
@@ -88,50 +95,50 @@ cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length) {
     return CX_INVALID_PARAMETER;
 }
 
-cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t curve,
-                                           const uint8_t *rawkey,
-                                           size_t key_len,
-                                           cx_ecfp_private_key_t *pvkey) {
+cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t curve __attribute__((unused)),
+                                           const uint8_t *rawkey __attribute__((unused)),
+                                           size_t key_len __attribute__((unused)),
+                                           cx_ecfp_private_key_t *pvkey __attribute__((unused))) {
     return CX_OK;
 }
 
-cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                uint32_t mode,
-                                cx_md_t hashID,
-                                const uint8_t *hash,
-                                size_t hash_len,
-                                uint8_t *sig,
-                                size_t *sig_len,
-                                uint32_t *info) {
+cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey __attribute__((unused)),
+                                uint32_t mode __attribute__((unused)),
+                                cx_md_t hashID __attribute__((unused)),
+                                const uint8_t *hash __attribute__((unused)),
+                                size_t hash_len __attribute__((unused)),
+                                uint8_t *sig __attribute__((unused)),
+                                size_t *sig_len __attribute__((unused)),
+                                uint32_t *info __attribute__((unused))) {
     return CX_OK;
 }
 
-cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t curve,
-                                         cx_ecfp_public_key_t *public_key,
-                                         cx_ecfp_private_key_t *private_key,
-                                         bool keep_private,
-                                         cx_md_t hashID) {
+cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t curve __attribute__((unused)),
+                                         cx_ecfp_public_key_t *public_key __attribute__((unused)),
+                                         cx_ecfp_private_key_t *private_key __attribute__((unused)),
+                                         bool keep_private __attribute__((unused)),
+                                         cx_md_t hashID __attribute__((unused))) {
     return CX_OK;
 }
 
-void os_perso_derive_node_with_seed_key(unsigned int mode,
-                                        cx_curve_t curve,
-                                        const unsigned int *path,
-                                        unsigned int pathLength,
-                                        unsigned char *privateKey,
-                                        unsigned char *chain,
-                                        unsigned char *seed_key,
-                                        unsigned int seed_key_length) {
+void os_perso_derive_node_with_seed_key(unsigned int mode __attribute__((unused)),
+                                        cx_curve_t curve __attribute__((unused)),
+                                        const unsigned int *path __attribute__((unused)),
+                                        unsigned int pathLength __attribute__((unused)),
+                                        unsigned char *privateKey __attribute__((unused)),
+                                        unsigned char *chain __attribute__((unused)),
+                                        unsigned char *seed_key __attribute__((unused)),
+                                        unsigned int seed_key_length __attribute__((unused))) {
 }
 
-cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
-                                   uint32_t mode,
-                                   cx_md_t hashID,
-                                   const uint8_t *hash,
-                                   size_t hash_len,
-                                   size_t rs_size,
-                                   uint8_t *sig_r,
-                                   uint8_t *sig_s,
-                                   uint32_t *info) {
+cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key __attribute__((unused)),
+                                   uint32_t mode __attribute__((unused)),
+                                   cx_md_t hashID __attribute__((unused)),
+                                   const uint8_t *hash __attribute__((unused)),
+                                   size_t hash_len __attribute__((unused)),
+                                   size_t rs_size __attribute__((unused)),
+                                   uint8_t *sig_r __attribute__((unused)),
+                                   uint8_t *sig_s __attribute__((unused)),
+                                   uint32_t *info __attribute__((unused))) {
     return CX_OK;
 }

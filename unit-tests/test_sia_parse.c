@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include <cmocka.h>
-#include "format.h"
+#include "sia_format.h"
 
 static void test_bin2hex(void **state) {
     (void) state;
