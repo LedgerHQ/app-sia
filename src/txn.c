@@ -5,6 +5,7 @@
 #include <limits.h>
 
 #include "sia.h"  // For SW_DEVELOPER_ERR. Should be removed.
+#include "sia_format.h"
 
 static void divWW10(uint64_t u1, uint64_t u0, uint64_t *q, uint64_t *r) {
     const uint64_t s = 60ULL;
@@ -347,10 +348,6 @@ void txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex) {
     txn->sigIndex = sigIndex;
 
     txn->elementIndex = 0;
-#ifdef HAVE_NBGL
-    txn->lastSiacoinOutputIndex = USHRT_MAX;
-    txn->lastSiafundOutputIndex = USHRT_MAX;
-#endif
     txn->elements[txn->elementIndex].elemType =
         TXN_ELEM_SC_INPUT - 1;  // first increment brings it to TXN_ELEM_SC_INPUT
 
@@ -362,7 +359,7 @@ void txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex) {
     blake2b_init(&txn->blake);
 }
 
-void txn_update(txn_state_t *txn, uint8_t *in, uint8_t inlen) {
+void txn_update(txn_state_t *txn, const uint8_t *in, uint8_t inlen) {
     // the buffer should never overflow; any elements should always be drained
     // before the next read.
     if (txn->buflen + inlen > sizeof(txn->buf)) {

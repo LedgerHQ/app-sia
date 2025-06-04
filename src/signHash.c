@@ -26,6 +26,7 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 
 // Get a pointer to signHash's state variables. This is purely for
 // convenience, so that we can refer to these variables concisely from any
@@ -89,7 +90,8 @@ static void confirm_callback(bool confirm) {
 
 #endif
 
-uint16_t handleSignHash(uint8_t p1 __attribute__((unused)),
+uint16_t handleSignHash(uint8_t ins __attribute__((unused)),
+                        uint8_t p1 __attribute__((unused)),
                         uint8_t p2 __attribute__((unused)),
                         uint8_t *buffer,
                         uint16_t len) {
