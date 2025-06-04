@@ -197,7 +197,7 @@ static void addReplayProtection(cx_blake2b_t *S) {
     // The official Sia Nano S app only signs transactions on the
     // Foundation-supported chain. To use the app on a different chain,
     // recompile the app with a different replayPrefix.
-    static uint8_t const replayPrefix[] = {1};
+    static uint8_t const replayPrefix[] = {2};
     blake2b_update(S, replayPrefix, 1);
 }
 
