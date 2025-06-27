@@ -144,6 +144,9 @@ uint16_t handleCalcTxnHash(
         if (ctx->initialized) {
             zero_ctx();
             return SW_IMPROPER_INIT;
+        } else if (len < (4+2+4)) {
+            zero_ctx();
+            return SW_INVALID_PARAM;
         }
         explicit_bzero(ctx, sizeof(calcTxnHashContext_t));
         ctx->initialized = true;
