@@ -71,7 +71,7 @@ Returns public key or addreses.
 | CLA  | INS  | P2
 | ---- | ---- | ---- |
 | 0xE0 | 0x02 | 0x00 to display address and 0x01 to display pubkey |
- 
+
 ##### Input data
 
 | Length  | Description  |
@@ -81,16 +81,11 @@ Returns public key or addreses.
 
 ##### Output data
 
-For pubkey
+Both pubkey and address are sent.  We choose which to display based on the P2 value.
 
 | Length  | Description  |
 | ---- | ---- |
 | 32 | Sia-encoded pubkey |
-
-For address
-
-| Length  | Description  |
-| ---- | ---- |
 | 76 | Sia-encoded address |
 
 ### SIGN_HASH
@@ -103,7 +98,7 @@ Sign a 32 byte hash.
 
 | CLA  | INS  |
 | ---- | ---- |
-| 0xE0 | 0x03 | 
+| 0xE0 | 0x04 |
 
 ##### Input data
 
@@ -128,8 +123,43 @@ Sign a transaction or retrieve its hash.
 
 | CLA  | INS  | P1   | P2   |
 | ---- | ---- | ---- | ---- |
-| 0xE0 | 0x04 | 0x00 for the first message and 0x80 for any messages after | 0x00 to display transaction hash and 0x01 to sign transaction hash |
- 
+| 0xE0 | 0x08 | 0x00 for the first message and 0x80 for any messages after | 0x00 to display transaction hash and 0x01 to sign transaction hash |
+
+##### Input data
+
+| Length  | Description  |
+| ---- | ---- |
+| 4 | (first packet) Little endian encoded uint32 key index |
+| 2 | (first packet) Little endian encoded uint16 signature index |
+| 4 | (first packet) Little endian encoded uint32 change index |
+| At most 255-4-2-4=245 bytes for the first packet and 255 thereafter | Sia-encoded transaction |
+
+##### Output data
+
+For transaction hash
+
+| Length  | Description  |
+| ---- | ---- |
+| 32 | Binary encoded transaction hash |
+
+For transaction signature
+
+| Length  | Description  |
+| ---- | ---- |
+| 64 | Binary encoded transaction signature |
+
+### GET_V2TXN_HASH
+
+Sign a v2 transaction or retrieve its hash.
+
+#### Encoding
+
+##### Command
+
+| CLA  | INS  | P1   | P2   |
+| ---- | ---- | ---- | ---- |
+| 0xE0 | 0x10 | 0x00 for the first message and 0x80 for any messages after | 0x00 to display transaction hash and 0x01 to sign transaction hash |
+
 ##### Input data
 
 | Length  | Description  |
