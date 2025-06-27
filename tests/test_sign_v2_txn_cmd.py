@@ -7,7 +7,7 @@ from application_client.boilerplate_command_sender import (
 )
 
 from ragger.backend import BackendInterface, RaisePolicy
-from ragger.firmware import Firmware
+from ledgered.devices import Device
 from ragger.navigator import Navigator, NavInsID
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
@@ -20,9 +20,9 @@ test_v2_transaction = bytes.fromhex(
     "0100000000000000e975d168a47835ec22d343646f6826c9721f00892ddbc4f38f5b579dfb509b4c0200000000000000000080235c49486c08d60a00000000003178e2a50d69c3083c2304cfb4cf6356022b355f3a75c7813f6dd32d42c7c52800000047b89290d810ac1500000000000000000000000000000000000000000000000000000000000000000000000000010000000000000048c650e3ba4a8f1720761459bcb0a92f099e660ee863cedc00663be52035dad7020000000000000019000000000000003178e2a50d69c3083c2304cfb4cf6356022b355f3a75c7813f6dd32d42c7c5284b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000155fd0ac4b9bb6010000000000000000"
 )
 
-def __get_instructions(firmware: Firmware, refused: bool) -> List[NavInsID]:
+def __get_instructions(device: Device, refused: bool) -> List[NavInsID]:
     instructions = []
-    if firmware.is_nano:
+    if device.is_nano:
         for _ in range(4):
             instructions.extend([NavInsID.RIGHT_CLICK])
             instructions.extend(2 * [NavInsID.BOTH_CLICK])
@@ -39,7 +39,7 @@ def __get_instructions(firmware: Firmware, refused: bool) -> List[NavInsID]:
 
 # Transaction signature refused test
 # The test will ask for a transaction signature that will be refused on screen
-def test_v2_sign_tx_refused(firmware: Firmware,
+def test_v2_sign_tx_refused(device: Device,
                          backend: BackendInterface,
                          navigator: Navigator,
                          scenario_navigator: NavigateWithScenario,
@@ -50,8 +50,8 @@ def test_v2_sign_tx_refused(firmware: Firmware,
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     with client.sign_v2_tx(0, 0, 4294967295, test_v2_transaction):
-        if firmware.is_nano:
-            instructions = __get_instructions(firmware, True)
+        if device.is_nano:
+            instructions = __get_instructions(device, True)
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, instructions)
         else:
             scenario_navigator.review_reject()
@@ -63,7 +63,7 @@ def test_v2_sign_tx_refused(firmware: Firmware,
 
 # Transaction signature accepted test
 # The test will ask for a transaction signature that will be accepted on screen
-def test_v2_sign_tx_accept(firmware: Firmware,
+def test_v2_sign_tx_accept(device: Device,
                         backend: BackendInterface,
                         navigator: Navigator,
                         scenario_navigator: NavigateWithScenario,
@@ -74,8 +74,8 @@ def test_v2_sign_tx_accept(firmware: Firmware,
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     with client.sign_v2_tx(0, 0, 4294967295, test_v2_transaction):
-        if firmware.is_nano:
-            instructions = __get_instructions(firmware, False)
+        if device.is_nano:
+            instructions = __get_instructions(device, False)
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, instructions)
         else:
             scenario_navigator.review_approve()
