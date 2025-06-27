@@ -33,7 +33,7 @@ void pubkeyToSiaAddress(char *dst, const uint8_t publicKey[static 65]);
 
 // deriveSiaPublicKey derives an Ed25519 public key from an index and the
 // Ledger seed.
-void deriveSiaPublicKey(uint32_t index, uint8_t publicKey[static 64]);
+void deriveSiaPublicKey(uint32_t index, uint8_t publicKey[static 65]);
 
 // deriveAndSign derives an Ed25519 private key from an index and the
 // Ledger seed, and uses it to produce a 64-byte signature of the provided
