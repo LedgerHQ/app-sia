@@ -37,7 +37,7 @@
 #define P2_DISPLAY_PUBKEY  0x01
 
 // Get a pointer to getPublicKey's state variables.
-static getPublicKeyContext_t* ctx = &global.getPublicKeyContext;
+static getPublicKeyContext_t *ctx = &global.getPublicKeyContext;
 
 static unsigned int process_pubkey(bool send);
 
@@ -98,7 +98,7 @@ static unsigned int process_pubkey(bool send) {
     uint8_t pubkeyBytes[32] = {0};
     extractPubkeyBytes(pubkeyBytes, publicKey);
     uint8_t siaAddress[76 + 1] = {0};
-    pubkeyToSiaAddress((char*) siaAddress, publicKey);
+    pubkeyToSiaAddress((char *) siaAddress, publicKey);
 
     // Flush the APDU buffer, sending the response.
     const buffer_t bufs[2] = {

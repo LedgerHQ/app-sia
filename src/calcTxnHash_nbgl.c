@@ -130,8 +130,7 @@ static void zero_ctx(void) {
 // handleCalcTxnHash reads a signature index and a transaction, calculates the
 // SigHash of the transaction, and optionally signs the hash using a specified
 // key. The transaction is displayed piece-wise to the user.
-uint16_t handleCalcTxnHash(
-    uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer, uint16_t len) {
+uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer, uint16_t len) {
     if ((p1 != P1_FIRST && p1 != P1_MORE) || (p2 != P2_DISPLAY_HASH && p2 != P2_SIGN_HASH)) {
         return SW_INVALID_PARAM;
     }
@@ -145,7 +144,7 @@ uint16_t handleCalcTxnHash(
         if (ctx->initialized) {
             zero_ctx();
             return SW_IMPROPER_INIT;
-        } else if (len < (4+2+4)) {
+        } else if (len < (4 + 2 + 4)) {
             zero_ctx();
             return SW_INVALID_PARAM;
         }
