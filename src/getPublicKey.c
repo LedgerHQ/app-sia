@@ -132,7 +132,7 @@ static unsigned int process_pubkey(bool send) {
 uint16_t handleGetPublicKey(uint8_t ins __attribute__((unused)),
                             uint8_t p1 __attribute__((unused)),
                             uint8_t p2,
-                            uint8_t* buffer,
+                            uint8_t *buffer,
                             uint16_t len __attribute__((unused))) {
     if ((p2 != P2_DISPLAY_ADDRESS) && (p2 != P2_DISPLAY_PUBKEY)) {
         return SW_INVALID_PARAM;

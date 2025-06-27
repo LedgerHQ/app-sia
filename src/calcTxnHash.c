@@ -201,7 +201,7 @@ static void zero_ctx(void) {
 // SigHash of the transaction, and optionally signs the hash using a specified
 // key. The transaction is displayed piece-wise to the user.
 uint16_t handleCalcTxnHash(
-    uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t dataLength) {
+    uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer, uint16_t len) {
     if ((p1 != P1_FIRST && p1 != P1_MORE) || (p2 != P2_DISPLAY_HASH && p2 != P2_SIGN_HASH)) {
         return SW_INVALID_PARAM;
     }
@@ -222,15 +222,15 @@ uint16_t handleCalcTxnHash(
         // If this is the first packet, it will include the key index, sig
         // index, and change index in addition to the transaction data. Use
         // these to initialize the ctx and the transaction decoder.
-        ctx->keyIndex = U4LE(dataBuffer, 0);  // NOTE: ignored if !ctx->sign
-        dataBuffer += 4;
-        dataLength -= 4;
-        const uint16_t sigIndex = U2LE(dataBuffer, 0);
-        dataBuffer += 2;
-        dataLength -= 2;
-        const uint32_t changeIndex = U4LE(dataBuffer, 0);
-        dataBuffer += 4;
-        dataLength -= 4;
+        ctx->keyIndex = U4LE(buffer, 0);  // NOTE: ignored if !ctx->sign
+        buffer += 4;
+        len -= 4;
+        const uint16_t sigIndex = U2LE(buffer, 0);
+        buffer += 2;
+        len -= 2;
+        const uint32_t changeIndex = U4LE(buffer, 0);
+        buffer += 4;
+        len -= 4;
         if (ins == INS_GET_TXN_HASH) {
             txn_init(&ctx->txn, sigIndex, changeIndex);
         } else {
@@ -251,9 +251,9 @@ uint16_t handleCalcTxnHash(
 
     // Add the new data to transaction decoder.
     if (ins == INS_GET_TXN_HASH) {
-        txn_update(&ctx->txn, dataBuffer, dataLength);
+        txn_update(&ctx->txn, buffer, len);
     } else {
-        v2txn_update(&ctx->txn, dataBuffer, dataLength);
+        v2txn_update(&ctx->txn, buffer, len);
     }
 
     // Attempt to decode the next element of the transaction. Note that this

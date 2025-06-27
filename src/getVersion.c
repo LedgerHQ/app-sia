@@ -14,8 +14,8 @@
 void handleGetVersion(uint8_t ins __attribute__((unused)),
                       uint8_t p1 __attribute__((unused)),
                       uint8_t p2 __attribute__((unused)),
-                      uint8_t *dataBuffer __attribute__((unused)),
-                      uint16_t dataLength __attribute__((unused))) {
+                      uint8_t *buffer __attribute__((unused)),
+                      uint16_t len __attribute__((unused))) {
     static const uint8_t appVersion[3] = {APPVERSION[0] - '0',
                                           APPVERSION[2] - '0',
                                           APPVERSION[4] - '0'};
