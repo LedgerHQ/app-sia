@@ -27,6 +27,7 @@ static void confirm_callback(bool confirm) {
             uint8_t signature[64] = {0};
             deriveAndSign(signature, ctx->keyIndex, ctx->txn.sigHash);
             io_send_response_pointer(signature, sizeof(signature), SW_OK);
+            explicit_bzero(signature, sizeof(signature));
             nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_SIGNED, ui_idle);
         } else {
             io_send_response_pointer(ctx->txn.sigHash, sizeof(ctx->txn.sigHash), SW_OK);

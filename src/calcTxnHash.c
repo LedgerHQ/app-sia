@@ -83,6 +83,7 @@ static unsigned int io_seproxyhal_touch_txn_hash_ok(void) {
     uint8_t signature[64] = {0};
     deriveAndSign(signature, ctx->keyIndex, ctx->txn.sigHash);
     io_send_response_pointer(signature, sizeof(signature), SW_OK);
+    explicit_bzero(signature, sizeof(signature));
     ui_idle();
     return 0;
 }
