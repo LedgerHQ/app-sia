@@ -133,8 +133,10 @@ uint16_t handleGetPublicKey(uint8_t ins __attribute__((unused)),
                             uint8_t p1 __attribute__((unused)),
                             uint8_t p2,
                             uint8_t *buffer,
-                            uint16_t len __attribute__((unused))) {
+                            uint16_t len) {
     if ((p2 != P2_DISPLAY_ADDRESS) && (p2 != P2_DISPLAY_PUBKEY)) {
+        return SW_INVALID_PARAM;
+    } else if (len != sizeof(uint32_t)) {
         return SW_INVALID_PARAM;
     }
 
