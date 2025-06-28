@@ -42,7 +42,19 @@ int bin2dec(char *dst, uint64_t n) {
 
 #define SC_ZEROS 24
 
-int formatSC(char *buf, uint8_t decLen) {
+int formatSC(char *buf, size_t bufLen, uint8_t decLen) {
+    size_t required = {0};
+    if (decLen < SC_ZEROS + 1) {
+        // (SC_ZEROS + 1) for number + 1 for decimal point + 4 for " SC\0"
+        required = SC_ZEROS + 1 + 1 + 4;
+    } else {
+        // decLen for number + 1 for decimal point + 4 for " SC\0"
+        required = decLen + 1 + 4;
+    }
+    if (bufLen < required) {
+        return -1;
+    }
+
     if (decLen < SC_ZEROS + 1) {
         // if < 1 SC, pad with leading zeros
         memmove(buf + (SC_ZEROS - decLen) + 2, buf, decLen + 1);

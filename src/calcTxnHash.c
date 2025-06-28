@@ -151,7 +151,7 @@ static void fmtTxnElem(void) {
             } else {
                 const uint8_t valLen =
                     cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-                formatSC(ctx->fullStr[0], valLen);
+                formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
                 ctx->elemPart = 0;
 
                 ctx->elementIndex++;
@@ -181,7 +181,7 @@ static void fmtTxnElem(void) {
 
             const uint8_t valLen =
                 cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-            formatSC(ctx->fullStr[0], valLen);
+            formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
 
             ctx->elemPart = 0;
             ctx->elementIndex++;

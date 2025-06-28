@@ -68,7 +68,7 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
                 contentTagValue.value = ctx->fullStr[0];
             } else {
                 valLen = cur2dec(ctx->fullStr[1], txn->elements[ctx->elementIndex].outVal);
-                formatSC(ctx->fullStr[1], valLen);
+                formatSC(ctx->fullStr[1], sizeof(ctx->fullStr[1]), valLen);
                 contentTagValue.item = "Amount (SC)";
                 contentTagValue.value = ctx->fullStr[1];
             }
@@ -107,7 +107,7 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
             // from the pairIndex
             ctx->elementIndex = pairIndex - lastOutputIndex;
             valLen = cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-            formatSC(ctx->fullStr[0], valLen);
+            formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
             contentTagValue.item = "Miner Fee Amount (SC)";
             contentTagValue.value = ctx->fullStr[0];
             contentTagValue.forcePageStart = true;
