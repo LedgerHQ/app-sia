@@ -20,8 +20,11 @@ void bin2hex(char *dst, const uint8_t *data, uint64_t inlen) {
     dst[2 * inlen] = '\0';
 }
 
-int bin2dec(char *dst, uint64_t n) {
+int bin2dec(char *dst, size_t dstLen, uint64_t n) {
     if (n == 0) {
+        if (dstLen < 2) {
+            return -1;
+        }
         dst[0] = '0';
         dst[1] = '\0';
         return 1;
@@ -30,6 +33,9 @@ int bin2dec(char *dst, uint64_t n) {
     int len = 0;
     for (uint64_t nn = n; nn != 0; nn /= 10) {
         len++;
+    }
+    if (dstLen < (size_t)len + 1) {
+        return -1;
     }
     // write digits in big-endian order
     for (int i = len - 1; i >= 0; i--) {

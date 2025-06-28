@@ -148,12 +148,12 @@ uint16_t handleGetPublicKey(uint8_t ins __attribute__((unused)),
     if (ctx->genAddr) {
         memmove(ctx->typeStr, "Generate Address", 17);
         memmove(ctx->keyStr, "from Key #", 10);
-        int n = bin2dec(ctx->keyStr + 10, ctx->keyIndex);
+        int n = bin2dec(ctx->keyStr + 10, sizeof(ctx->keyStr) - 10, ctx->keyIndex);
         memmove(ctx->keyStr + 10 + n, "?", 2);
     } else {
         memmove(ctx->typeStr, "Generate Public", 16);
         memmove(ctx->keyStr, "Key #", 5);
-        int n = bin2dec(ctx->keyStr + 5, ctx->keyIndex);
+        int n = bin2dec(ctx->keyStr + 5, sizeof(ctx->keyStr) - 5, ctx->keyIndex);
         memmove(ctx->keyStr + 5 + n, "?", 2);
     }
 

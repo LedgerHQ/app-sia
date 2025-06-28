@@ -12,7 +12,7 @@ void bin2hex(char *dst, const uint8_t *data, uint64_t inlen);
 
 // bin2dec converts an unsigned integer to a decimal string and appends a
 // final NUL byte. It returns the length of the string.
-int bin2dec(char *dst, uint64_t n);
+int bin2dec(char *dst, size_t dstLen, uint64_t n);
 
 // formatSC converts a decimal string from Hastings to Siacoins. It returns the
 // new length of the string.

@@ -96,7 +96,7 @@ static unsigned int ui_calcTxnHash_elem_button(void) {
             // If we're signing the transaction, prepare and display the
             // approval screen.
             memmove(ctx->fullStr[0], "with key #", 10);
-            memmove(ctx->fullStr[0] + 10 + (bin2dec(ctx->fullStr[0] + 10, ctx->keyIndex)), "?", 2);
+            memmove(ctx->fullStr[0] + 10 + (bin2dec(ctx->fullStr[0] + 10, sizeof(ctx->fullStr[0]) - 10, ctx->keyIndex)), "?", 2);
             ux_flow_init(0, ux_sign_txn_flow, NULL);
         } else {
             // If we're just computing the hash, send it immediately and
@@ -140,7 +140,7 @@ static void fmtTxnElem(void) {
         case TXN_ELEM_SC_OUTPUT:
         case V2TXN_ELEM_SC_OUTPUT:
             memmove(ctx->labelStr, "SC Output #", 11);
-            bin2dec(ctx->labelStr + 11, display_index());
+            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
             // An element can have multiple screens. For each siacoin output, the
             // user needs to see both the destination address and the amount.
             // These are rendered in separate screens, and elemPart is used to
@@ -160,7 +160,7 @@ static void fmtTxnElem(void) {
         case TXN_ELEM_SF_OUTPUT:
         case V2TXN_ELEM_SF_OUTPUT:
             memmove(ctx->labelStr, "SF Output #", 11);
-            bin2dec(ctx->labelStr + 11, display_index());
+            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
             if (ctx->elemPart == 0) {
                 format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
                 ctx->elemPart++;
@@ -177,7 +177,7 @@ static void fmtTxnElem(void) {
         case V2TXN_ELEM_MINER_FEE:
             // Miner fees only have one part.
             memmove(ctx->labelStr, "Miner Fee #", 11);
-            bin2dec(ctx->labelStr + 11, display_index());
+            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
 
             const uint8_t valLen =
                 cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
