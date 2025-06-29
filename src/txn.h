@@ -88,7 +88,7 @@ txnDecoderState_e txn_parse(txn_state_t *txn);
 
 // txn takes the Sia-encoded address in src and converts it to a hex encoded
 // readable address in dst
-void format_address(char *dst, uint8_t *src);
+void format_address(char *dst, size_t dstLen, uint8_t *src);
 
 // cur2dec converts a Sia-encoded currency value to a decimal string and
 // appends a final NUL byte. It returns the length of the string. If the value

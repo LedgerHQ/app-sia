@@ -111,7 +111,7 @@ uint16_t handleSignHash(uint8_t ins __attribute__((unused)),
     memcpy(ctx->hash, buffer + sizeof(uint32_t), SIA_HASH_SIZE);
 
     // Prepare to display the comparison screen by converting the hash to hex
-    bin2hex(ctx->hexHash, ctx->hash, SIA_HASH_SIZE);
+    bin2hex(ctx->hexHash, sizeof(ctx->hexHash), ctx->hash, SIA_HASH_SIZE);
 
 #ifdef HAVE_BAGL
     ux_flow_init(0, ux_approve_hash_flow, NULL);

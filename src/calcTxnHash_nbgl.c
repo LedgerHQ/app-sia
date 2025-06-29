@@ -63,7 +63,9 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
             // the destination address and the amount.
             ctx->elementIndex = pairIndex / 2;
             if (pairIndex % 2 == 0) {
-                format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
+                format_address(ctx->fullStr[0],
+                               sizeof(ctx->fullStr[0]),
+                               txn->elements[ctx->elementIndex].outAddr);
                 contentTagValue.item = "To";
                 contentTagValue.value = ctx->fullStr[0];
             } else {
@@ -80,7 +82,9 @@ static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
             // the destination address and the amount.
             ctx->elementIndex = pairIndex / 2;
             if (pairIndex % 2 == 0) {
-                format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
+                format_address(ctx->fullStr[0],
+                               sizeof(ctx->fullStr[0]),
+                               txn->elements[ctx->elementIndex].outAddr);
                 contentTagValue.item = "To";
                 contentTagValue.value = ctx->fullStr[0];
             } else {

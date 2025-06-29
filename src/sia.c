@@ -55,7 +55,10 @@ void deriveAndSign(uint8_t *dst, uint32_t index, const uint8_t *hash) {
                   "signing txn failed");
 }
 
-void pubkeyToSiaAddress(char *dst, const uint8_t publicKey[static 65]) {
+void pubkeyToSiaAddress(char *dst, size_t dstLen, const uint8_t publicKey[static 65]) {
+    if (dstLen < (76 + 1)) {
+        return;
+    }
     // A Sia address is the Merkle root of a set of unlock conditions.
     // For a "standard" address, the unlock conditions are:
     //
@@ -108,6 +111,6 @@ void pubkeyToSiaAddress(char *dst, const uint8_t publicKey[static 65]) {
     blake2b(checksum, sizeof(checksum), merkleData + 1, 32);
 
     // convert the hash+checksum to hex
-    bin2hex(dst, merkleData + 1, 32);
-    bin2hex(dst + 64, checksum, sizeof(checksum));
+    bin2hex(dst, 64 + 1, merkleData + 1, 32);
+    bin2hex(dst + 64, dstLen - 64, checksum, sizeof(checksum));
 }

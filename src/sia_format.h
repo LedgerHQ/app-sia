@@ -8,7 +8,7 @@
 void extractPubkeyBytes(unsigned char *dst, const uint8_t publicKey[static 65]);
 
 // bin2hex converts binary to hex and appends a final NUL byte.
-void bin2hex(char *dst, const uint8_t *data, uint64_t inlen);
+void bin2hex(char *dst, size_t dstLen, const uint8_t *data, size_t dataLen);
 
 // bin2dec converts an unsigned integer to a decimal string and appends a
 // final NUL byte. It returns the length of the string.

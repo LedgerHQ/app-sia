@@ -98,7 +98,7 @@ static unsigned int process_pubkey(bool send) {
     uint8_t pubkeyBytes[32] = {0};
     extractPubkeyBytes(pubkeyBytes, publicKey);
     uint8_t siaAddress[76 + 1] = {0};
-    pubkeyToSiaAddress((char *) siaAddress, publicKey);
+    pubkeyToSiaAddress((char *) siaAddress, sizeof(siaAddress), publicKey);
 
     // Flush the APDU buffer, sending the response.
     const buffer_t bufs[2] = {
@@ -120,7 +120,7 @@ static unsigned int process_pubkey(bool send) {
     } else {
         // The APDU buffer contains the raw bytes of the public key, so
         // first we need to convert to a human-readable form.
-        bin2hex(ctx->fullStr, pubkeyBytes, 32);
+        bin2hex(ctx->fullStr, sizeof(ctx->fullStr), pubkeyBytes, 32);
     }
 
 #ifdef HAVE_BAGL

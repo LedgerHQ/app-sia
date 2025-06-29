@@ -215,7 +215,7 @@ void v2txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex) {
 
     uint8_t publicKey[65] = {0};
     deriveSiaPublicKey(changeIndex, publicKey);
-    pubkeyToSiaAddress((char *) &txn->changeAddr, publicKey);
+    pubkeyToSiaAddress((char *) &txn->changeAddr, sizeof(txn->changeAddr), publicKey);
 
     // initialize hash state
     blake2b_init(&txn->blake);

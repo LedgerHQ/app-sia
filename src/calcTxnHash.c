@@ -96,13 +96,20 @@ static unsigned int ui_calcTxnHash_elem_button(void) {
             // If we're signing the transaction, prepare and display the
             // approval screen.
             memmove(ctx->fullStr[0], "with key #", 10);
-            memmove(ctx->fullStr[0] + 10 + (bin2dec(ctx->fullStr[0] + 10, sizeof(ctx->fullStr[0]) - 10, ctx->keyIndex)), "?", 2);
+            memmove(
+                ctx->fullStr[0] + 10 +
+                    (bin2dec(ctx->fullStr[0] + 10, sizeof(ctx->fullStr[0]) - 10, ctx->keyIndex)),
+                "?",
+                2);
             ux_flow_init(0, ux_sign_txn_flow, NULL);
         } else {
             // If we're just computing the hash, send it immediately and
             // display the comparison screen
             io_send_response_pointer(ctx->txn.sigHash, sizeof(ctx->txn.sigHash), SW_OK);
-            bin2hex(ctx->fullStr[0], ctx->txn.sigHash, sizeof(ctx->txn.sigHash));
+            bin2hex(ctx->fullStr[0],
+                    sizeof(ctx->fullStr[0]),
+                    ctx->txn.sigHash,
+                    sizeof(ctx->txn.sigHash));
             ux_flow_init(0, ux_compare_hash_flow, NULL);
         }
         // Reset the initialization state.
@@ -146,7 +153,9 @@ static void fmtTxnElem(void) {
             // These are rendered in separate screens, and elemPart is used to
             // identify which screen is being viewed.
             if (ctx->elemPart == 0) {
-                format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
+                format_address(ctx->fullStr[0],
+                               sizeof(ctx->fullStr[0]),
+                               txn->elements[ctx->elementIndex].outAddr);
                 ctx->elemPart++;
             } else {
                 const uint8_t valLen =
@@ -162,7 +171,9 @@ static void fmtTxnElem(void) {
             memmove(ctx->labelStr, "SF Output #", 11);
             bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
             if (ctx->elemPart == 0) {
-                format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
+                format_address(ctx->fullStr[0],
+                               sizeof(ctx->fullStr[0]),
+                               txn->elements[ctx->elementIndex].outAddr);
                 ctx->elemPart++;
             } else {
                 const uint8_t valLen =

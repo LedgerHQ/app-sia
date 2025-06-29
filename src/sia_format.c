@@ -11,13 +11,16 @@ void extractPubkeyBytes(unsigned char *dst, const uint8_t publicKey[static 65]) 
     }
 }
 
-void bin2hex(char *dst, const uint8_t *data, uint64_t inlen) {
+void bin2hex(char *dst, size_t dstLen, const uint8_t *data, size_t dataLen) {
+    if (dstLen < (2 * dataLen + 1)) {
+        return;
+    }
     static uint8_t const hex[] = "0123456789abcdef";
-    for (uint64_t i = 0; i < inlen; i++) {
+    for (uint64_t i = 0; i < dataLen; i++) {
         dst[2 * i + 0] = hex[(data[i] >> 4) & 0x0F];
         dst[2 * i + 1] = hex[(data[i] >> 0) & 0x0F];
     }
-    dst[2 * inlen] = '\0';
+    dst[2 * dataLen] = '\0';
 }
 
 int bin2dec(char *dst, size_t dstLen, uint64_t n) {
@@ -34,7 +37,7 @@ int bin2dec(char *dst, size_t dstLen, uint64_t n) {
     for (uint64_t nn = n; nn != 0; nn /= 10) {
         len++;
     }
-    if (dstLen < (size_t)len + 1) {
+    if (dstLen < (size_t) len + 1) {
         return -1;
     }
     // write digits in big-endian order
@@ -49,7 +52,7 @@ int bin2dec(char *dst, size_t dstLen, uint64_t n) {
 #define SC_ZEROS 24
 
 int formatSC(char *buf, size_t bufLen, uint8_t decLen) {
-    size_t required = {0};
+    size_t required = 0;
     if (decLen < SC_ZEROS + 1) {
         // (SC_ZEROS + 1) for number + 1 for decimal point + 4 for " SC\0"
         required = SC_ZEROS + 1 + 1 + 4;

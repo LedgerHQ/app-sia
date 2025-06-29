@@ -353,7 +353,7 @@ void txn_init(txn_state_t *txn, uint16_t sigIndex, uint32_t changeIndex) {
 
     uint8_t publicKey[65] = {0};
     deriveSiaPublicKey(changeIndex, publicKey);
-    pubkeyToSiaAddress((char *) &txn->changeAddr, publicKey);
+    pubkeyToSiaAddress((char *) &txn->changeAddr, sizeof(txn->changeAddr), publicKey);
 
     // initialize hash state
     blake2b_init(&txn->blake);
@@ -375,9 +375,9 @@ void txn_update(txn_state_t *txn, const uint8_t *in, uint8_t inlen) {
     txn->pos = 0;
 }
 
-void format_address(char *dst, uint8_t *src) {
-    bin2hex(dst, src, 32);
+void format_address(char *dst, size_t dstLen, uint8_t *src) {
+    bin2hex(dst, 64 + 1, src, 32);
     uint8_t checksum[6];
     blake2b(checksum, sizeof(checksum), src, 32);
-    bin2hex(dst + 64, checksum, sizeof(checksum));
+    bin2hex(dst + 64, dstLen - 64, checksum, sizeof(checksum));
 }

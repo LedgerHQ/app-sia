@@ -31,7 +31,7 @@ typedef struct {
     uint8_t hash[SIA_HASH_SIZE];
 
     char typeStr[40];
-    char hexHash[SIA_HASH_SIZE * 2];
+    char hexHash[SIA_HASH_SIZE * 2 + 1];
 } signHashContext_t;
 
 typedef struct {

@@ -29,7 +29,7 @@
 #define P2_SIGN_HASH    0x01  // sign transaction hash
 
 // pubkeyToSiaAddress converts a Ledger pubkey to a Sia wallet address.
-void pubkeyToSiaAddress(char *dst, const uint8_t publicKey[static 65]);
+void pubkeyToSiaAddress(char *dst, size_t dstLen, const uint8_t publicKey[static 65]);
 
 // deriveSiaPublicKey derives an Ed25519 public key from an index and the
 // Ledger seed.
