@@ -15,7 +15,7 @@ static void test_bin2hex(void **state) {
 
     const uint8_t src[] = {0, 1, 2, 4, 8, 16, 32, 64, 128, 255};
     char dst[2 * sizeof(src) + 1];
-    bin2hex(dst, src, sizeof(src));
+    bin2hex(dst, sizeof(dst), src, sizeof(src));
 
     const char expected[2 * sizeof(src) + 1] = {
         '0', '0', '0', '1', '0', '2', '0', '4', '0', '8',  '1',
@@ -46,7 +46,7 @@ static void test_bin2dec_zero(void **state) {
     (void) state;
 
     char buf[32];
-    int len = bin2dec(buf, 0);
+    int len = bin2dec(buf, sizeof(buf), 0);
 
     assert_int_equal(len, 1);
     assert_string_equal(buf, "0");
@@ -56,7 +56,7 @@ static void test_bin2dec_large(void **state) {
     (void) state;
 
     char buf[32];
-    int len = bin2dec(buf, 1234567890ULL);
+    int len = bin2dec(buf, sizeof(buf), 1234567890ULL);
 
     assert_int_equal(len, 10);
     assert_string_equal(buf, "1234567890");
@@ -67,7 +67,7 @@ static void test_formatSC_zero(void **state) {
 
     char buf[255] = {0};
     buf[0] = '0';
-    const int len = formatSC(buf, 1);
+    const int len = formatSC(buf, sizeof(buf), 1);
 
     // Should result in: "0 SC"
     assert_int_equal(len, 1 + 1 + 2);
@@ -82,7 +82,7 @@ static void test_formatSC_small(void **state) {
     buf[1] = '1';
     buf[2] = '2';
     buf[3] = '3';
-    const int len = formatSC(buf, 4);
+    const int len = formatSC(buf, sizeof(buf), 4);
 
     // Should result in: "0.000000000000000000000123 SC"
     assert_int_equal(len, 26 + 1 + 2);
@@ -97,7 +97,7 @@ static void test_formatSC_large(void **state) {
     for (int i = 1; i < 26; i++) {
         buf[i] = '7';
     }
-    const int len = formatSC(buf, 26);
+    const int len = formatSC(buf, sizeof(buf), 26);
 
     // Should result in: "17.777777777777777777777777 SC"
     assert_int_equal(len, 27 + 1 + 2);
