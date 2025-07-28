@@ -17,6 +17,7 @@
  ********************************************************************************/
 
 #include <glyphs.h>
+#include <main_std_app.h>
 #include <os.h>
 #include <os_io_seproxyhal.h>
 #include <stdbool.h>
@@ -51,7 +52,7 @@ static char BLIND_SIGNING_MESSAGE[22] = {0};
 
 UX_STEP_NOCB(ux_menu_ready_step, nn, {"Awaiting", "commands"});
 UX_STEP_CB(ux_menu_about_step, pn, ui_menu_about(), {&C_icon_certificate, "About"});
-UX_STEP_VALID(ux_menu_exit_step, pn, os_sched_exit(0), {&C_icon_dashboard, "Quit"});
+UX_STEP_VALID(ux_menu_exit_step, pn, app_exit(), {&C_icon_dashboard, "Quit"});
 
 // flow for the main menu:
 // #1 screen: ready
@@ -145,7 +146,7 @@ static void update_blind_sign_ui(void) {
 
 void app_quit(void) {
     // exit app here
-    os_sched_exit(-1);
+    app_exit();
 }
 
 void ui_idle(void) {
