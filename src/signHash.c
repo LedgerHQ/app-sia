@@ -26,6 +26,7 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 
 // Get a pointer to signHash's state variables. This is purely for
 // convenience, so that we can refer to these variables concisely from any
@@ -39,6 +40,7 @@ static unsigned int io_seproxyhal_touch_hash_ok(void) {
     uint8_t signature[64] = {0};
     deriveAndSign(signature, ctx->keyIndex, ctx->hash);
     io_send_response_pointer(signature, sizeof(signature), SW_OK);
+    explicit_bzero(signature, sizeof(signature));
 
 #ifdef HAVE_BAGL
     ui_idle();
@@ -89,7 +91,8 @@ static void confirm_callback(bool confirm) {
 
 #endif
 
-uint16_t handleSignHash(uint8_t p1 __attribute__((unused)),
+uint16_t handleSignHash(uint8_t ins __attribute__((unused)),
+                        uint8_t p1 __attribute__((unused)),
                         uint8_t p2 __attribute__((unused)),
                         uint8_t *buffer,
                         uint16_t len) {
@@ -108,7 +111,7 @@ uint16_t handleSignHash(uint8_t p1 __attribute__((unused)),
     memcpy(ctx->hash, buffer + sizeof(uint32_t), SIA_HASH_SIZE);
 
     // Prepare to display the comparison screen by converting the hash to hex
-    bin2hex(ctx->hexHash, ctx->hash, SIA_HASH_SIZE);
+    bin2hex(ctx->hexHash, sizeof(ctx->hexHash), ctx->hash, SIA_HASH_SIZE);
 
 #ifdef HAVE_BAGL
     ux_flow_init(0, ux_approve_hash_flow, NULL);

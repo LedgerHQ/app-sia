@@ -29,6 +29,7 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 
 // These are APDU parameters that control the behavior of the getPublicKey
 // command.
@@ -36,7 +37,7 @@
 #define P2_DISPLAY_PUBKEY  0x01
 
 // Get a pointer to getPublicKey's state variables.
-static getPublicKeyContext_t* ctx = &global.getPublicKeyContext;
+static getPublicKeyContext_t *ctx = &global.getPublicKeyContext;
 
 static unsigned int process_pubkey(bool send);
 
@@ -97,7 +98,7 @@ static unsigned int process_pubkey(bool send) {
     uint8_t pubkeyBytes[32] = {0};
     extractPubkeyBytes(pubkeyBytes, publicKey);
     uint8_t siaAddress[76 + 1] = {0};
-    pubkeyToSiaAddress((char*) siaAddress, publicKey);
+    pubkeyToSiaAddress((char *) siaAddress, sizeof(siaAddress), publicKey);
 
     // Flush the APDU buffer, sending the response.
     const buffer_t bufs[2] = {
@@ -119,7 +120,7 @@ static unsigned int process_pubkey(bool send) {
     } else {
         // The APDU buffer contains the raw bytes of the public key, so
         // first we need to convert to a human-readable form.
-        bin2hex(ctx->fullStr, pubkeyBytes, 32);
+        bin2hex(ctx->fullStr, sizeof(ctx->fullStr), pubkeyBytes, 32);
     }
 
 #ifdef HAVE_BAGL
@@ -128,11 +129,14 @@ static unsigned int process_pubkey(bool send) {
     return 0;
 }
 
-uint16_t handleGetPublicKey(uint8_t p1, uint8_t p2, uint8_t* buffer, uint16_t len) {
-    UNUSED(p1);
-    UNUSED(len);
-
+uint16_t handleGetPublicKey(uint8_t ins __attribute__((unused)),
+                            uint8_t p1 __attribute__((unused)),
+                            uint8_t p2,
+                            uint8_t *buffer,
+                            uint16_t len) {
     if ((p2 != P2_DISPLAY_ADDRESS) && (p2 != P2_DISPLAY_PUBKEY)) {
+        return SW_INVALID_PARAM;
+    } else if (len != sizeof(uint32_t)) {
         return SW_INVALID_PARAM;
     }
 
@@ -144,12 +148,12 @@ uint16_t handleGetPublicKey(uint8_t p1, uint8_t p2, uint8_t* buffer, uint16_t le
     if (ctx->genAddr) {
         memmove(ctx->typeStr, "Generate Address", 17);
         memmove(ctx->keyStr, "from Key #", 10);
-        int n = bin2dec(ctx->keyStr + 10, ctx->keyIndex);
+        int n = bin2dec(ctx->keyStr + 10, sizeof(ctx->keyStr) - 10, ctx->keyIndex);
         memmove(ctx->keyStr + 10 + n, "?", 2);
     } else {
         memmove(ctx->typeStr, "Generate Public", 16);
         memmove(ctx->keyStr, "Key #", 5);
-        int n = bin2dec(ctx->keyStr + 5, ctx->keyIndex);
+        int n = bin2dec(ctx->keyStr + 5, sizeof(ctx->keyStr) - 5, ctx->keyIndex);
         memmove(ctx->keyStr + 5 + n, "?", 2);
     }
 

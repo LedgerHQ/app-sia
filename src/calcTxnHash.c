@@ -31,7 +31,9 @@
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
+#include "sia_format.h"
 #include "txn.h"
+#include "v2txn.h"
 
 static calcTxnHashContext_t *ctx = &global.calcTxnHashContext;
 
@@ -81,6 +83,7 @@ static unsigned int io_seproxyhal_touch_txn_hash_ok(void) {
     uint8_t signature[64] = {0};
     deriveAndSign(signature, ctx->keyIndex, ctx->txn.sigHash);
     io_send_response_pointer(signature, sizeof(signature), SW_OK);
+    explicit_bzero(signature, sizeof(signature));
     ui_idle();
     return 0;
 }
@@ -93,13 +96,20 @@ static unsigned int ui_calcTxnHash_elem_button(void) {
             // If we're signing the transaction, prepare and display the
             // approval screen.
             memmove(ctx->fullStr[0], "with key #", 10);
-            memmove(ctx->fullStr[0] + 10 + (bin2dec(ctx->fullStr[0] + 10, ctx->keyIndex)), "?", 2);
+            memmove(
+                ctx->fullStr[0] + 10 +
+                    (bin2dec(ctx->fullStr[0] + 10, sizeof(ctx->fullStr[0]) - 10, ctx->keyIndex)),
+                "?",
+                2);
             ux_flow_init(0, ux_sign_txn_flow, NULL);
         } else {
             // If we're just computing the hash, send it immediately and
             // display the comparison screen
             io_send_response_pointer(ctx->txn.sigHash, sizeof(ctx->txn.sigHash), SW_OK);
-            bin2hex(ctx->fullStr[0], ctx->txn.sigHash, sizeof(ctx->txn.sigHash));
+            bin2hex(ctx->fullStr[0],
+                    sizeof(ctx->fullStr[0]),
+                    ctx->txn.sigHash,
+                    sizeof(ctx->txn.sigHash));
             ux_flow_init(0, ux_compare_hash_flow, NULL);
         }
         // Reset the initialization state.
@@ -134,31 +144,36 @@ static void fmtTxnElem(void) {
     txn_state_t *txn = &ctx->txn;
 
     switch (txn->elements[ctx->elementIndex].elemType) {
-        case TXN_ELEM_SC_OUTPUT: {
+        case TXN_ELEM_SC_OUTPUT:
+        case V2TXN_ELEM_SC_OUTPUT:
             memmove(ctx->labelStr, "SC Output #", 11);
-            bin2dec(ctx->labelStr + 11, display_index());
+            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
             // An element can have multiple screens. For each siacoin output, the
             // user needs to see both the destination address and the amount.
             // These are rendered in separate screens, and elemPart is used to
             // identify which screen is being viewed.
             if (ctx->elemPart == 0) {
-                format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
+                format_address(ctx->fullStr[0],
+                               sizeof(ctx->fullStr[0]),
+                               txn->elements[ctx->elementIndex].outAddr);
                 ctx->elemPart++;
             } else {
                 const uint8_t valLen =
                     cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-                formatSC(ctx->fullStr[0], valLen);
+                formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
                 ctx->elemPart = 0;
 
                 ctx->elementIndex++;
             }
             break;
-        }
-        case TXN_ELEM_SF_OUTPUT: {
+        case TXN_ELEM_SF_OUTPUT:
+        case V2TXN_ELEM_SF_OUTPUT:
             memmove(ctx->labelStr, "SF Output #", 11);
-            bin2dec(ctx->labelStr + 11, display_index());
+            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
             if (ctx->elemPart == 0) {
-                format_address(ctx->fullStr[0], txn->elements[ctx->elementIndex].outAddr);
+                format_address(ctx->fullStr[0],
+                               sizeof(ctx->fullStr[0]),
+                               txn->elements[ctx->elementIndex].outAddr);
                 ctx->elemPart++;
             } else {
                 const uint8_t valLen =
@@ -169,26 +184,24 @@ static void fmtTxnElem(void) {
                 ctx->elementIndex++;
             }
             break;
-        }
-        case TXN_ELEM_MINER_FEE: {
+        case TXN_ELEM_MINER_FEE:
+        case V2TXN_ELEM_MINER_FEE:
             // Miner fees only have one part.
             memmove(ctx->labelStr, "Miner Fee #", 11);
-            bin2dec(ctx->labelStr + 11, display_index());
+            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
 
             const uint8_t valLen =
                 cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-            formatSC(ctx->fullStr[0], valLen);
+            formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
 
             ctx->elemPart = 0;
             ctx->elementIndex++;
             break;
-        }
-        default: {
+        default:
             // This should never happen.
             io_send_sw(SW_DEVELOPER_ERR);
             ui_idle();
             break;
-        }
     }
 }
 
@@ -199,7 +212,7 @@ static void zero_ctx(void) {
 // handleCalcTxnHash reads a signature index and a transaction, calculates the
 // SigHash of the transaction, and optionally signs the hash using a specified
 // key. The transaction is displayed piece-wise to the user.
-uint16_t handleCalcTxnHash(uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t dataLength) {
+uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer, uint16_t len) {
     if ((p1 != P1_FIRST && p1 != P1_MORE) || (p2 != P2_DISPLAY_HASH && p2 != P2_SIGN_HASH)) {
         return SW_INVALID_PARAM;
     }
@@ -213,6 +226,9 @@ uint16_t handleCalcTxnHash(uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t
         if (ctx->initialized) {
             zero_ctx();
             return SW_IMPROPER_INIT;
+        } else if (len < (4 + 2 + 4)) {
+            zero_ctx();
+            return SW_INVALID_PARAM;
         }
         zero_ctx();
         ctx->initialized = true;
@@ -220,17 +236,20 @@ uint16_t handleCalcTxnHash(uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t
         // If this is the first packet, it will include the key index, sig
         // index, and change index in addition to the transaction data. Use
         // these to initialize the ctx and the transaction decoder.
-        ctx->keyIndex = U4LE(dataBuffer, 0);  // NOTE: ignored if !ctx->sign
-        dataBuffer += 4;
-        dataLength -= 4;
-        uint16_t sigIndex = U2LE(dataBuffer, 0);
-        dataBuffer += 2;
-        dataLength -= 2;
-        uint32_t changeIndex = U4LE(dataBuffer, 0);
-        dataBuffer += 4;
-        dataLength -= 4;
-        txn_init(&ctx->txn, sigIndex, changeIndex);
-
+        ctx->keyIndex = U4LE(buffer, 0);  // NOTE: ignored if !ctx->sign
+        buffer += 4;
+        len -= 4;
+        const uint16_t sigIndex = U2LE(buffer, 0);
+        buffer += 2;
+        len -= 2;
+        const uint32_t changeIndex = U4LE(buffer, 0);
+        buffer += 4;
+        len -= 4;
+        if (ins == INS_GET_TXN_HASH) {
+            txn_init(&ctx->txn, sigIndex, changeIndex);
+        } else {
+            v2txn_init(&ctx->txn, sigIndex, changeIndex);
+        }
         // Set ctx->sign according to P2.
         ctx->sign = (p2 & P2_SIGN_HASH);
 
@@ -245,12 +264,16 @@ uint16_t handleCalcTxnHash(uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t
     }
 
     // Add the new data to transaction decoder.
-    txn_update(&ctx->txn, dataBuffer, dataLength);
+    if (ins == INS_GET_TXN_HASH) {
+        txn_update(&ctx->txn, buffer, len);
+    } else {
+        v2txn_update(&ctx->txn, buffer, len);
+    }
 
     // Attempt to decode the next element of the transaction. Note that this
     // code is essentially identical to ui_calcTxnHash_elem_button. Sadly,
     // there doesn't seem to be a clean way to avoid this duplication.
-    switch (txn_parse(&ctx->txn)) {
+    switch ((ins == INS_GET_TXN_HASH) ? txn_parse(&ctx->txn) : v2txn_parse(&ctx->txn)) {
         case TXN_STATE_ERR:
             // don't leave state lingering
             zero_ctx();

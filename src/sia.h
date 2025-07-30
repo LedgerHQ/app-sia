@@ -13,33 +13,27 @@
 #define SW_INS_NOT_SUPPORTED 0x6D00
 #define SW_OK                0x9000
 
+// The APDU protocol uses a single-byte instruction code (INS) to specify
+// which command should be executed. We'll use this code to dispatch on a
+// table of function pointers.
+#define INS_GET_VERSION    0x01
+#define INS_GET_PUBLIC_KEY 0x02
+#define INS_SIGN_HASH      0x04
+#define INS_GET_TXN_HASH   0x08
+#define INS_GET_V2TXN_HASH 0x10
+
 // APDU parameters
 #define P1_FIRST        0x00  // 1st packet of multi-packet transfer
 #define P1_MORE         0x80  // nth packet of multi-packet transfer
 #define P2_DISPLAY_HASH 0x00  // display transaction hash
 #define P2_SIGN_HASH    0x01  // sign transaction hash
 
-// bin2hex converts binary to hex and appends a final NUL byte.
-void bin2hex(char *dst, const uint8_t *data, uint64_t inlen);
-
-// bin2dec converts an unsigned integer to a decimal string and appends a
-// final NUL byte. It returns the length of the string.
-int bin2dec(char *dst, uint64_t n);
-
-// formatSC converts a decimal string from Hastings to Siacoins. It returns the
-// new length of the string.
-int formatSC(char *buf, uint8_t decLen);
-
-// extractPubkeyBytes converts a Ledger-style public key to a Sia-friendly
-// 32-byte array.
-void extractPubkeyBytes(unsigned char *dst, const uint8_t publicKey[static 65]);
-
 // pubkeyToSiaAddress converts a Ledger pubkey to a Sia wallet address.
-void pubkeyToSiaAddress(char *dst, const uint8_t publicKey[static 65]);
+void pubkeyToSiaAddress(char *dst, size_t dstLen, const uint8_t publicKey[static 65]);
 
 // deriveSiaPublicKey derives an Ed25519 public key from an index and the
 // Ledger seed.
-void deriveSiaPublicKey(uint32_t index, uint8_t publicKey[static 64]);
+void deriveSiaPublicKey(uint32_t index, uint8_t publicKey[static 65]);
 
 // deriveAndSign derives an Ed25519 private key from an index and the
 // Ledger seed, and uses it to produce a 64-byte signature of the provided
