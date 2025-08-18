@@ -17,6 +17,7 @@
  ********************************************************************************/
 
 #include <glyphs.h>
+#include <main_std_app.h>
 #include <os.h>
 #include <os_io_seproxyhal.h>
 #include <stdbool.h>
@@ -51,7 +52,7 @@ static char BLIND_SIGNING_MESSAGE[22] = {0};
 
 UX_STEP_NOCB(ux_menu_ready_step, nn, {"Awaiting", "commands"});
 UX_STEP_CB(ux_menu_about_step, pn, ui_menu_about(), {&C_icon_certificate, "About"});
-UX_STEP_VALID(ux_menu_exit_step, pn, os_sched_exit(0), {&C_icon_dashboard, "Quit"});
+UX_STEP_VALID(ux_menu_exit_step, pn, app_exit(), {&C_icon_dashboard, "Quit"});
 
 // flow for the main menu:
 // #1 screen: ready
@@ -127,13 +128,12 @@ static const nbgl_content_t contents[SETTING_CONTENTS_NB] = {
      .content.switchesList.switches = switches,
      .contentActionCallback = controls_callback}};
 
-static const nbgl_genericContents_t settingContents = {.callbackCallNeeded = false,
-                                                       .contentsList = contents,
-                                                       .nbContents = SETTING_CONTENTS_NB};
+static const nbgl_genericContents_t settingContents = {
+    .callbackCallNeeded = false, .contentsList = contents, .nbContents = SETTING_CONTENTS_NB};
 
-static void controls_callback(int token, uint8_t index, int page) {
-    UNUSED(index);
-    UNUSED(page);
+static void controls_callback(int token,
+                              uint8_t index __attribute__((unused)),
+                              int page __attribute__((unused))) {
     if (token == BLIND_SIGNING_TOKEN) {
         toggle_blind_sign();
     }
@@ -145,7 +145,7 @@ static void update_blind_sign_ui(void) {
 
 void app_quit(void) {
     // exit app here
-    os_sched_exit(-1);
+    app_exit();
 }
 
 void ui_idle(void) {
@@ -173,17 +173,10 @@ unsigned int io_reject(void) {
     return 0;
 }
 
-// The APDU protocol uses a single-byte instruction code (INS) to specify
-// which command should be executed. We'll use this code to dispatch on a
-// table of function pointers.
-#define INS_GET_VERSION    0x01
-#define INS_GET_PUBLIC_KEY 0x02
-#define INS_SIGN_HASH      0x04
-#define INS_GET_TXN_HASH   0x08
-
 // This is the function signature for a command handler.
 // Returns 0 on success.
-typedef uint16_t handler_fn_t(uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t dataLength);
+typedef uint16_t handler_fn_t(
+    uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t dataLength);
 
 handler_fn_t handleGetVersion;
 handler_fn_t handleGetPublicKey;
@@ -199,6 +192,7 @@ static handler_fn_t *lookupHandler(uint8_t ins) {
         case INS_SIGN_HASH:
             return handleSignHash;
         case INS_GET_TXN_HASH:
+        case INS_GET_V2TXN_HASH:
             return handleCalcTxnHash;
         default:
             return NULL;
@@ -282,7 +276,7 @@ void app_main() {
             continue;
         }
 
-        const uint16_t e = handlerFn(cmd.p1, cmd.p2, cmd.data, cmd.lc);
+        const uint16_t e = handlerFn(cmd.ins, cmd.p1, cmd.p2, cmd.data, cmd.lc);
         if (e != 0) {
             send_error_code(e);
             continue;

@@ -1,5 +1,5 @@
 from ragger.backend import BackendInterface, RaisePolicy
-from ragger.firmware import Firmware
+from ledgered.devices import Device
 from ragger.navigator import Navigator, NavIns, NavInsID
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
@@ -14,8 +14,8 @@ test_to_sign = bytes.fromhex(
 )
 
 
-def __toggle_setting(firmware: Firmware, navigator: Navigator) -> None:
-    if firmware.is_nano:
+def __toggle_setting(device: Device, navigator: Navigator) -> None:
+    if device.is_nano:
         navigator.navigate([
             NavInsID.RIGHT_CLICK,
             NavInsID.BOTH_CLICK,
@@ -33,14 +33,14 @@ def __toggle_setting(firmware: Firmware, navigator: Navigator) -> None:
 
 
 # Test will ask to sign a hash that will be accepted on screen
-def test_sign_hash_accept(firmware: Firmware,
+def test_sign_hash_accept(device: Device,
                           backend: BackendInterface,
                           navigator: Navigator,
                           scenario_navigator: NavigateWithScenario):
     client = BoilerplateCommandSender(backend)
     index = 5
 
-    __toggle_setting(firmware, navigator)
+    __toggle_setting(device, navigator)
 
     with client.sign_hash_with_confirmation(index, test_to_sign):
         # Disable raising when trying to unpack an error APDU
@@ -55,14 +55,14 @@ def test_sign_hash_accept(firmware: Firmware,
 
 
 # Test will ask to sign a hash that will be rejected on screen
-def test_sign_hash_reject(firmware: Firmware,
+def test_sign_hash_reject(device: Device,
                           backend: BackendInterface,
                           navigator: Navigator,
                           scenario_navigator: NavigateWithScenario):
     client = BoilerplateCommandSender(backend)
     index = 5
 
-    __toggle_setting(firmware, navigator)
+    __toggle_setting(device, navigator)
 
     with client.sign_hash_with_confirmation(index, test_to_sign):
         # Disable raising when trying to unpack an error APDU
