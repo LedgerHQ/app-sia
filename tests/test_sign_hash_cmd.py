@@ -1,8 +1,9 @@
 from ragger.backend import BackendInterface, RaisePolicy
-from ledgered.devices import Device
 from ragger.navigator import Navigator, NavIns, NavInsID
 from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ragger.firmware.touch.positions import POSITIONS
 
+from ledgered.devices import Device
 from application_client.boilerplate_command_sender import (
     BoilerplateCommandSender,
     Errors,
@@ -26,7 +27,7 @@ def __toggle_setting(device: Device, navigator: Navigator) -> None:
     else:
         navigator.navigate([
             NavInsID.USE_CASE_HOME_SETTINGS,
-            NavIns(NavInsID.TOUCH, (350,115)),
+            NavIns(NavInsID.TOUCH, POSITIONS["ChoiceList"][device.type][1]),
             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
         ], screen_change_before_first_instruction=False)
 
