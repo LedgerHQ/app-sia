@@ -1,5 +1,4 @@
 import base64
-from typing import List
 
 from application_client.boilerplate_command_sender import (
     BoilerplateCommandSender,
@@ -7,11 +6,8 @@ from application_client.boilerplate_command_sender import (
 )
 
 from ragger.backend import BackendInterface, RaisePolicy
-from ragger.navigator import Navigator, NavInsID
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
-from ledgered.devices import Device
-from utils import ROOT_SCREENSHOT_PATH
 
 # In this tests we check the behavior of the device when asked to sign a transaction
 
@@ -22,41 +18,18 @@ test_v2_transaction = bytes.fromhex(
 )
 # pylint: enable=line-too-long
 
-def __get_instructions(device: Device, refused: bool) -> List[NavInsID]:
-    instructions = []
-    if device.is_nano:
-        for _ in range(4):
-            instructions.extend([NavInsID.RIGHT_CLICK])
-            instructions.extend(2 * [NavInsID.BOTH_CLICK])
-        instructions.append(NavInsID.BOTH_CLICK)
-
-        if refused:
-            instructions.extend([NavInsID.RIGHT_CLICK])
-        instructions.extend([
-            NavInsID.RIGHT_CLICK,
-            NavInsID.BOTH_CLICK,
-        ])
-    return instructions
-
 
 # Transaction signature refused test
 # The test will ask for a transaction signature that will be refused on screen
-def test_v2_sign_tx_refused(device: Device,
-                         backend: BackendInterface,
-                         navigator: Navigator,
-                         scenario_navigator: NavigateWithScenario,
-                         test_name: str):
+def test_v2_sign_tx_refused(backend: BackendInterface,
+                            scenario_navigator: NavigateWithScenario):
     # Use the app interface instead of raw interface
     client = BoilerplateCommandSender(backend)
     # Disable raising when trying to unpack an error APDU
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     with client.sign_v2_tx(0, 0, 4294967295, test_v2_transaction):
-        if device.is_nano:
-            instructions = __get_instructions(device, True)
-            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, instructions)
-        else:
-            scenario_navigator.review_reject()
+        scenario_navigator.review_reject()
 
     response = client.get_async_response()
     assert response.status == Errors.SW_DENY
@@ -65,23 +38,13 @@ def test_v2_sign_tx_refused(device: Device,
 
 # Transaction signature accepted test
 # The test will ask for a transaction signature that will be accepted on screen
-def test_v2_sign_tx_accept(device: Device,
-                        backend: BackendInterface,
-                        navigator: Navigator,
-                        scenario_navigator: NavigateWithScenario,
-                        test_name: str):
+def test_v2_sign_tx_accept(backend: BackendInterface,
+                           scenario_navigator: NavigateWithScenario):
     # Use the app interface instead of raw interface
     client = BoilerplateCommandSender(backend)
-    # Disable raising when trying to unpack an error APDU
-    backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     with client.sign_v2_tx(0, 0, 4294967295, test_v2_transaction):
-        if device.is_nano:
-            instructions = __get_instructions(device, False)
-            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, instructions)
-        else:
-            scenario_navigator.review_approve()
-
+        scenario_navigator.review_approve(custom_screen_text="Sign Transaction")
 
     response = client.get_async_response()
     assert response.status == Errors.SW_OK

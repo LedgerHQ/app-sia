@@ -20,8 +20,9 @@ def __toggle_setting(device: Device, navigator: Navigator) -> None:
         navigator.navigate([
             NavInsID.RIGHT_CLICK,
             NavInsID.BOTH_CLICK,
+            NavInsID.BOTH_CLICK,
             NavInsID.RIGHT_CLICK,
-            NavInsID.RIGHT_CLICK,
+            NavInsID.BOTH_CLICK,
             NavInsID.BOTH_CLICK,
         ], screen_change_before_first_instruction=False)
     else:
@@ -46,7 +47,7 @@ def test_sign_hash_accept(device: Device,
     with client.sign_hash_with_confirmation(index, test_to_sign):
         # Disable raising when trying to unpack an error APDU
         backend.raise_policy = RaisePolicy.RAISE_NOTHING
-        scenario_navigator.review_approve()
+        scenario_navigator.review_approve(custom_screen_text="Sign hash")
 
     response = client.get_async_response()
     assert response.status == Errors.SW_OK
