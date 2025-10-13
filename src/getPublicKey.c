@@ -18,13 +18,13 @@
 //
 // Keep this description in mind as you read through the implementation.
 
-#include <os.h>
-#include <io.h>
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <buffer.h>
+#include "os.h"
+#include "io.h"
+#include "os_io_seproxyhal.h"
+#include "buffer.h"
 
 #include "blake2b.h"
 #include "sia.h"
@@ -106,7 +106,7 @@ static unsigned int process_pubkey(bool send) {
         {.ptr = siaAddress, .size = 76, .offset = 0},
     };
     if (send) {
-        io_send_response_buffers(bufs, sizeof(bufs) / sizeof(bufs[0]), SW_OK);
+        io_send_response_buffers(bufs, sizeof(bufs) / sizeof(bufs[0]), SWO_SUCCESS);
     }
 
 // Prepare the comparison screen, filling in the header and body text.
@@ -163,7 +163,7 @@ uint16_t handleGetPublicKey(uint8_t ins __attribute__((unused)),
     process_pubkey(false);
     nbgl_useCaseAddressReview(ctx->fullStr,
                               NULL,
-                              &C_stax_app_sia_big,
+                              &ICON_APP_SIA,
                               ctx->typeStr,
                               ctx->keyStr,
                               review_choice);

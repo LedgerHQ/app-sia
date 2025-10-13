@@ -18,7 +18,7 @@ All commands use CLA = 0xE0.
 ### Commands requiring multiple messages
 
 Sending a transaction can sometimes take multiple messages if the transaction is sufficiently large.
-In the event that more data is required, SW_OK is returned and the app listens for additional messages,
+In the event that more data is required, SWO_SUCCESS is returned and the app listens for additional messages,
 which will use P1_MORE=0x80 instead of P1_FIRST=0x00.
 
 ### Note on encoding
@@ -33,8 +33,8 @@ To learn more on how transactions are encoded, visit [Transaction](https://pkg.g
 | 0x6B01 | SW_INVALID_PARAM     | Invalid user specified parameters are supplied such as an invalid signature index when signing a transaction                                                                                                                             |
 | 0x6B02 | SW_IMPROPER_INIT     | If this is the first packet of a transaction signing event, the transaction context must not already be initialized. Otherwise, an attacker could fool the user by concatenating two transactions.  This error is returned in that case. |
 | 0x6985 | SW_USER_REJECTED     | User declined this action                                                                                                                                                                                                                |
-| 0x6D00 | SW_INS_NOT_SUPPORTED | Unsupported command used                                                                                                                                                                                                                 |
-| 0x9000 | SW_OK                | Success                                                                                                                                                                                                                                  |
+| 0x6D00 | SWO_INVALID_INS | Unsupported command used                                                                                                                                                                                                                 |
+| 0x9000 | SWO_SUCCESS                | Success                                                                                                                                                                                                                                  |
 
 ## Commands
 

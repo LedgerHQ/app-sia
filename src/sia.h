@@ -1,17 +1,15 @@
-#ifndef SIA_H
-#define SIA_H
+#pragma once
 
-#include <os.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "os.h"
+#include "status_words.h"
 
 // exception codes
-#define SW_DEVELOPER_ERR     0x6B00
-#define SW_INVALID_PARAM     0x6B01
-#define SW_IMPROPER_INIT     0x6B02
-#define SW_USER_REJECTED     0x6985
-#define SW_INS_NOT_SUPPORTED 0x6D00
-#define SW_OK                0x9000
+#define SW_DEVELOPER_ERR 0x6B00
+#define SW_INVALID_PARAM 0x6B01
+#define SW_IMPROPER_INIT 0x6B02
+#define SW_USER_REJECTED SWO_CONDITIONS_NOT_SATISFIED
 
 // The APDU protocol uses a single-byte instruction code (INS) to specify
 // which command should be executed. We'll use this code to dispatch on a
@@ -39,5 +37,3 @@ void deriveSiaPublicKey(uint32_t index, uint8_t publicKey[static 65]);
 // Ledger seed, and uses it to produce a 64-byte signature of the provided
 // 32-byte hash. The key is cleared from memory after signing.
 void deriveAndSign(uint8_t *dst, uint32_t index, const uint8_t *hash);
-
-#endif /* SIA_H */

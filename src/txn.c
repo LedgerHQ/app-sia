@@ -1,9 +1,9 @@
-#include "txn.h"
 
-#include <os.h>
 #include <string.h>
 #include <limits.h>
+#include "os.h"
 
+#include "txn.h"
 #include "sia.h"  // For SW_DEVELOPER_ERR. Should be removed.
 #include "sia_format.h"
 

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 #ifdef HAVE_BAGL
+=======
+>>>>>>> 6f64353 (Cleanup headers)
 // This file contains the implementation of the calcTxnHash command. It is
 // significantly more complicated than the other commands, mostly due to the
 // transaction parsing.
@@ -20,13 +23,14 @@
 //
 // Keep this description in mind as you read through the implementation.
 
-#include <os.h>
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <ux.h>
-#include <io.h>
+#include <limits.h>
+#include "io.h"
+#include "os.h"
+#include "os_io_seproxyhal.h"
+#include "ux.h"
 
 #include "blake2b.h"
 #include "sia.h"
@@ -290,5 +294,3 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
 
     return 0;
 }
-
-#endif /* HAVE_BAGL */

@@ -1,6 +1,4 @@
-#ifndef TXN_H
-#define TXN_H
-
+#pragma once
 #include <stdint.h>
 
 #include "blake2b.h"
@@ -94,5 +92,3 @@ void format_address(char *dst, size_t dstLen, uint8_t *src);
 // appends a final NUL byte. It returns the length of the string. If the value
 // is too large, it throws TXN_STATE_ERR.
 int cur2dec(char *out, uint8_t *cur);
-
-#endif /* TXN_H */

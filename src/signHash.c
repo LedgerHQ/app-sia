@@ -39,7 +39,7 @@ static unsigned int io_seproxyhal_touch_hash_ok(void) {
     // encountered; it is defined in sia.c.
     uint8_t signature[64] = {0};
     deriveAndSign(signature, ctx->keyIndex, ctx->hash);
-    io_send_response_pointer(signature, sizeof(signature), SW_OK);
+    io_send_response_pointer(signature, sizeof(signature), SWO_SUCCESS);
     explicit_bzero(signature, sizeof(signature));
 
 #ifdef HAVE_BAGL
@@ -127,7 +127,7 @@ uint16_t handleSignHash(uint8_t ins __attribute__((unused)),
 
     nbgl_useCaseReview(TYPE_MESSAGE,
                        &tagValueList,
-                       &C_stax_app_sia_big,
+                       &ICON_APP_SIA,
                        ctx->typeStr,
                        NULL,
                        "Sign hash",

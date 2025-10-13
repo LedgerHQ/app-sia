@@ -16,15 +16,15 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include <glyphs.h>
-#include <main_std_app.h>
-#include <os.h>
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <io.h>
-#include <ux.h>
-#include <parser.h>
+#include "main_std_app.h"
+#include "offsets.h"
+#include "os.h"
+#include "os_io_seproxyhal.h"
+#include "io.h"
+#include "ux.h"
+#include "parser.h"
 
 #include "blake2b.h"
 #include "sia.h"
@@ -128,8 +128,9 @@ static const nbgl_content_t contents[SETTING_CONTENTS_NB] = {
      .content.switchesList.switches = switches,
      .contentActionCallback = controls_callback}};
 
-static const nbgl_genericContents_t settingContents = {
-    .callbackCallNeeded = false, .contentsList = contents, .nbContents = SETTING_CONTENTS_NB};
+static const nbgl_genericContents_t settingContents = {.callbackCallNeeded = false,
+                                                       .contentsList = contents,
+                                                       .nbContents = SETTING_CONTENTS_NB};
 
 static void controls_callback(int token,
                               uint8_t index __attribute__((unused)),
@@ -155,7 +156,7 @@ void ui_idle(void) {
     switches[BLIND_SIGNING_ID].tuneId = TUNE_TAP_CASUAL;
 
     nbgl_useCaseHomeAndSettings(APPNAME,
-                                &C_stax_app_sia_big,
+                                &ICON_APP_SIA,
                                 NULL,
                                 INIT_HOME_PAGE,
                                 &settingContents,
@@ -175,8 +176,11 @@ unsigned int io_reject(void) {
 
 // This is the function signature for a command handler.
 // Returns 0 on success.
-typedef uint16_t handler_fn_t(
-    uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t dataLength);
+typedef uint16_t handler_fn_t(uint8_t ins,
+                              uint8_t p1,
+                              uint8_t p2,
+                              uint8_t *dataBuffer,
+                              uint16_t dataLength);
 
 handler_fn_t handleGetVersion;
 handler_fn_t handleGetPublicKey;
@@ -272,7 +276,7 @@ void app_main() {
         handler_fn_t *handlerFn = lookupHandler(cmd.ins);
         if (!handlerFn) {
             PRINTF("Instruction not supported");
-            send_error_code(SW_INS_NOT_SUPPORTED);
+            send_error_code(SWO_INVALID_INS);
             continue;
         }
 

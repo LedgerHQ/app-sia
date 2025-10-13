@@ -1,5 +1,4 @@
-#ifndef V2TXN_H
-#define V2TXN_H
+#pragma once
 
 #include "txn.h"
 
@@ -16,5 +15,3 @@ void v2txn_update(txn_state_t *txn, const uint8_t *in, uint8_t inlen);
 // encountered, it returns TXN_STATE_ERR. If the transaction has been fully
 // decoded, it returns TXN_STATE_FINISHED.
 txnDecoderState_e v2txn_parse(txn_state_t *txn);
-
-#endif /* V2TXN_H */

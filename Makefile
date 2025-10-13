@@ -29,7 +29,7 @@ APPNAME = "Sia"
 
 # Application version
 APPVERSION_M = 2
-APPVERSION_N = 1
+APPVERSION_N = 2
 APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
@@ -42,6 +42,7 @@ ICON_NANOX = icons/nanox_app_sia.gif
 ICON_NANOSP = icons/nanos2_app_sia.gif
 ICON_STAX = icons/stax_app_sia.gif
 ICON_FLEX = icons/flex_app_sia.gif
+ICON_APEX_P = icons/apex_app_sia.png
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
@@ -97,7 +98,7 @@ ENABLE_BLUETOOTH = 1
 ########################################
 # These advanced settings allow to disable some feature that are by
 # default enabled in the SDK `Makefile.standard_app`.
-#DISABLE_STANDARD_APP_FILES = 1 
+#DISABLE_STANDARD_APP_FILES = 1
 #DISABLE_DEFAULT_IO_SEPROXY_BUFFER_SIZE = 1 # To allow custom size declaration
 #DISABLE_STANDARD_APP_DEFINES = 1 # Will set all the following disablers
 #DISABLE_STANDARD_SNPRINTF = 1

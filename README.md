@@ -1,6 +1,6 @@
-# ledger-app-sia-x
+# ledger-app-sia
 
-This is a Sia wallet app for the Ledger Stax, Nano S, Nano SP, and Nano X.
+This is a Sia wallet app for the Ledger devices.
 
 When installed on a Ledger device, the app allows you to generate Sia addresses,
 calculate transaction hashes, sign those hashes, and use those signatures to

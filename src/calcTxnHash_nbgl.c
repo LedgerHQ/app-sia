@@ -220,7 +220,7 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
             contentTagValueList.callback = getTagValuePairs;
             nbgl_useCaseReview(TYPE_TRANSACTION,
                                &contentTagValueList,
-                               &C_stax_app_sia_big,
+                               &ICON_APP_SIA,
                                (ctx->sign) ? "Sign Transaction" : "Hash Transaction",
                                NULL,
                                (ctx->sign) ? "Sign Transaction" : "Hash Transaction",
