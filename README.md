@@ -20,7 +20,8 @@ the device. `./sialedger --help` will print a list of commands.
 
 ## Installation and Usage
 
-Please refer to our [standalone guide](https://docs.sia.tech/sia-integrations/using-the-sia-ledger-nano-app-sia-central) for a walkthrough that demonstrates how
+Please refer to our [standalone guide](https://docs.sia.tech/sia-integrations/using-the-sia-ledger-nano-app-sia-central)
+for a walkthrough that demonstrates how
 to install the app, generate addresses and sign transactions.
 
 ## Security Model
@@ -57,8 +58,8 @@ they can only gather metadata and temporarily prevent the user from performing
 certain actions. Type-1 and type-2 actions, on the other hand, are much more
 dangerous, and can be trivially exploited to steal the user's coins.
 
-To combat these attacks, apps must make use of the embedded display on the
-Ledger device. If data sent to/from the Ledger device is displayed on the screen, the user
+To combat these attacks, apps must make use of the embedded display on the Ledger device.
+If data sent to/from the Ledger device is displayed on the screen, the user
 can verify that the computer is not lying about what it sent or received. In
 the interest of user-friendliness, we would like to display as little
 information as much as possible, but each omission brings with it the risk of

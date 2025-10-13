@@ -49,9 +49,11 @@ def test_sign_hash_accept(device: Device,
 
     response = client.get_async_response()
     assert response.status == Errors.SW_OK
+    # pylint: disable=line-too-long
     assert response.data == bytes.fromhex(
         "abd9187ca30200709137fa76dee32d58700f05c2debef62fb9b36af663498657384772ea437c886e07be20ddc60aaf04bb54736ab5dbaed4c00a6bdffcf7750f"
     )
+    # pylint: enable=line-too-long
 
 
 # Test will ask to sign a hash that will be rejected on screen
