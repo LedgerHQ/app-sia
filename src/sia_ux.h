@@ -3,12 +3,11 @@
 #include "ux.h"
 #include "txn.h"
 #include "glyphs.h"
+#include "nbgl_use_case.h"
 
-#ifdef HAVE_NBGL
-#include <nbgl_use_case.h>
-#endif
-
-#if defined(TARGET_STAX) || defined(TARGET_FLEX)
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#define ICON_APP_SIA C_nanox_app_sia
+#elif defined(TARGET_STAX) || defined(TARGET_FLEX)
 #define ICON_APP_SIA C_stax_app_sia_big
 #elif defined(TARGET_APEX_P)
 #define ICON_APP_SIA C_apex_app_sia_big
@@ -45,10 +44,8 @@ typedef struct {
     uint8_t elemPart;  // screen index of elements
 
     uint16_t elementIndex;
-#ifdef HAVE_NBGL
     uint16_t lastSiacoinOutputIndex;
     uint16_t lastSiafundOutputIndex;
-#endif
 
     txn_state_t txn;
     // NULL-terminated strings for display
@@ -77,9 +74,6 @@ extern const internalStorage_t N_storage_real;
 // ui_idle displays the main menu screen. Command handlers should call ui_idle
 // when they finish.
 void ui_idle(void);
-
-// about submenu of the main screen
-void ui_menu_about(void);
 
 // standard "reject" function so we don't repeat code
 unsigned int io_reject(void);

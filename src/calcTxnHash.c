@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-#ifdef HAVE_BAGL
-=======
->>>>>>> 6f64353 (Cleanup headers)
 // This file contains the implementation of the calcTxnHash command. It is
 // significantly more complicated than the other commands, mostly due to the
 // transaction parsing.
@@ -38,175 +34,118 @@
 #include "sia_format.h"
 #include "txn.h"
 #include "v2txn.h"
+#include "nbgl_use_case.h"
 
 static calcTxnHashContext_t *ctx = &global.calcTxnHashContext;
+static nbgl_contentTagValueList_t contentTagValueList = {0};
+static nbgl_contentTagValue_t contentTagValue = {0};
 
-static void fmtTxnElem(void);
-static uint16_t display_index(void);
-static unsigned int ui_calcTxnHash_elem_button(void);
-static unsigned int io_seproxyhal_touch_txn_hash_ok(void);
+static void confirm_callback(bool confirm) {
+    ctx->initialized = false;
 
-UX_STEP_CB(ux_compare_hash_flow_1_step,
-           bnnn_paging,
-           ui_idle(),
-           {"Compare Hash:", global.calcTxnHashContext.fullStr[0]});
-
-UX_FLOW(ux_compare_hash_flow, &ux_compare_hash_flow_1_step);
-
-UX_STEP_NOCB(ux_sign_txn_flow_1_step, nn, {"Sign this txn", global.calcTxnHashContext.fullStr[0]});
-
-UX_STEP_VALID(ux_sign_txn_flow_2_step,
-              pb,
-              io_seproxyhal_touch_txn_hash_ok(),
-              {&C_icon_validate_14, "Approve"});
-
-UX_STEP_VALID(ux_sign_txn_flow_3_step, pb, io_reject(), {&C_icon_crossmark, "Reject"});
-
-// Flow for the signing transaction menu:
-// #1 screen: "Sign this txn?"
-// #2 screen: approve
-// #3 screen: reject
-UX_FLOW(ux_sign_txn_flow,
-        &ux_sign_txn_flow_1_step,
-        &ux_sign_txn_flow_2_step,
-        &ux_sign_txn_flow_3_step);
-
-// We use one generic step for each element so we don't have to make
-// separate UX_FLOWs for SC outputs, SF outputs, miner fees, etc
-UX_STEP_CB(ux_show_txn_elem_1_step,
-           bnnn_paging,
-           ui_calcTxnHash_elem_button(),
-           {global.calcTxnHashContext.labelStr, global.calcTxnHashContext.fullStr[0]});
-
-// For each element of the transaction (sc outputs, sf outputs, miner fees),
-// we show the data paginated for confirmation purposes. When the user
-// confirms that element, they are shown the next element until
-// they finish all the elements and are given the option to approve/reject.
-UX_FLOW(ux_show_txn_elem_flow, &ux_show_txn_elem_1_step);
-static unsigned int io_seproxyhal_touch_txn_hash_ok(void) {
-    uint8_t signature[64] = {0};
-    deriveAndSign(signature, ctx->keyIndex, ctx->txn.sigHash);
-    io_send_response_pointer(signature, sizeof(signature), SW_OK);
-    explicit_bzero(signature, sizeof(signature));
-    ui_idle();
-    return 0;
-}
-
-static unsigned int ui_calcTxnHash_elem_button(void) {
-    if (ctx->elementIndex >= ctx->txn.elementIndex) {
-        // We've finished decoding the transaction, and all elements have
-        // been displayed.
+    if (confirm) {
         if (ctx->sign) {
-            // If we're signing the transaction, prepare and display the
-            // approval screen.
-            memmove(ctx->fullStr[0], "with key #", 10);
-            memmove(
-                ctx->fullStr[0] + 10 +
-                    (bin2dec(ctx->fullStr[0] + 10, sizeof(ctx->fullStr[0]) - 10, ctx->keyIndex)),
-                "?",
-                2);
-            ux_flow_init(0, ux_sign_txn_flow, NULL);
+            uint8_t signature[64] = {0};
+            deriveAndSign(signature, ctx->keyIndex, ctx->txn.sigHash);
+            io_send_response_pointer(signature, sizeof(signature), SWO_SUCCESS);
+            explicit_bzero(signature, sizeof(signature));
+            nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_SIGNED, ui_idle);
         } else {
-            // If we're just computing the hash, send it immediately and
-            // display the comparison screen
-            io_send_response_pointer(ctx->txn.sigHash, sizeof(ctx->txn.sigHash), SW_OK);
-            bin2hex(ctx->fullStr[0],
-                    sizeof(ctx->fullStr[0]),
-                    ctx->txn.sigHash,
-                    sizeof(ctx->txn.sigHash));
-            ux_flow_init(0, ux_compare_hash_flow, NULL);
+            io_send_response_pointer(ctx->txn.sigHash, sizeof(ctx->txn.sigHash), SWO_SUCCESS);
+            nbgl_useCaseStatus("TRANSACTION HASHED", true, ui_idle);
         }
-        // Reset the initialization state.
-        ctx->elementIndex = 0;
-        ctx->initialized = false;
-        return 0;
+    } else {
+        io_send_sw(SW_USER_REJECTED);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_REJECTED, ui_idle);
     }
-
-    fmtTxnElem();
-    ux_flow_init(0, ux_show_txn_elem_flow, NULL);
-    return 0;
 }
 
-// Gets the current index number to be displayed in the UI
-static uint16_t display_index(void) {
-    txn_state_t *txn = &ctx->txn;
-    uint16_t first_index_of_type = 0;
-    const txnElemType_e current_type = txn->elements[ctx->elementIndex].elemType;
-    for (uint16_t i = 0; i < txn->elementIndex; i++) {
-        if (current_type == txn->elements[i].elemType) {
-            first_index_of_type = i;
-            break;
-        }
+txnElemType_e element_type(uint8_t pairIndex) {
+    if (ctx->lastSiacoinOutputIndex != USHRT_MAX &&
+        (pairIndex / 2) <= ctx->lastSiacoinOutputIndex) {
+        return TXN_ELEM_SC_OUTPUT;
+    } else if (ctx->lastSiafundOutputIndex != USHRT_MAX &&
+               (pairIndex / 2) <= ctx->lastSiafundOutputIndex) {
+        return TXN_ELEM_SF_OUTPUT;
     }
-    return ctx->elementIndex - first_index_of_type + 1;
+    return TXN_ELEM_MINER_FEE;
 }
-// This is a helper function that prepares an element of the transaction for
-// display. It stores the type of the element in labelStr, and a human-
-// readable representation of the element in fullStr. As in previous screens,
-// partialStr holds the visible portion of fullStr.
-static void fmtTxnElem(void) {
-    txn_state_t *txn = &ctx->txn;
 
-    switch (txn->elements[ctx->elementIndex].elemType) {
+static nbgl_contentTagValue_t *getTagValuePairs(uint8_t pairIndex) {
+    txn_state_t *txn = &ctx->txn;
+    uint8_t valLen = 0;
+    uint16_t lastOutputIndex = 0;
+
+    explicit_bzero(&contentTagValue, sizeof(contentTagValue));
+    switch (element_type(pairIndex)) {
         case TXN_ELEM_SC_OUTPUT:
         case V2TXN_ELEM_SC_OUTPUT:
-            memmove(ctx->labelStr, "SC Output #", 11);
-            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
-            // An element can have multiple screens. For each siacoin output, the
-            // user needs to see both the destination address and the amount.
-            // These are rendered in separate screens, and elemPart is used to
-            // identify which screen is being viewed.
-            if (ctx->elemPart == 0) {
+            // For each siacoin output, the user needs to see both
+            // the destination address and the amount.
+            ctx->elementIndex = pairIndex / 2;
+            if (pairIndex % 2 == 0) {
                 format_address(ctx->fullStr[0],
                                sizeof(ctx->fullStr[0]),
                                txn->elements[ctx->elementIndex].outAddr);
-                ctx->elemPart++;
+                contentTagValue.item = "To";
+                contentTagValue.value = ctx->fullStr[0];
             } else {
-                const uint8_t valLen =
-                    cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-                formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
-                ctx->elemPart = 0;
-
-                ctx->elementIndex++;
+                valLen = cur2dec(ctx->fullStr[1], txn->elements[ctx->elementIndex].outVal);
+                formatSC(ctx->fullStr[1], sizeof(ctx->fullStr[1]), valLen);
+                contentTagValue.item = "Amount (SC)";
+                contentTagValue.value = ctx->fullStr[1];
             }
+            contentTagValue.forcePageStart = false;
             break;
         case TXN_ELEM_SF_OUTPUT:
         case V2TXN_ELEM_SF_OUTPUT:
-            memmove(ctx->labelStr, "SF Output #", 11);
-            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
-            if (ctx->elemPart == 0) {
+            // For each siafund output, the user needs to see both
+            // the destination address and the amount.
+            ctx->elementIndex = pairIndex / 2;
+            if (pairIndex % 2 == 0) {
                 format_address(ctx->fullStr[0],
                                sizeof(ctx->fullStr[0]),
                                txn->elements[ctx->elementIndex].outAddr);
-                ctx->elemPart++;
+                contentTagValue.item = "To";
+                contentTagValue.value = ctx->fullStr[0];
             } else {
-                const uint8_t valLen =
-                    cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
-                memmove(ctx->fullStr[0] + valLen, " SF", 4);
-                ctx->elemPart = 0;
-
-                ctx->elementIndex++;
+                cur2dec(ctx->fullStr[1], txn->elements[ctx->elementIndex].outVal);
+                contentTagValue.item = "Amount (SF)";
+                contentTagValue.value = ctx->fullStr[1];
             }
+            contentTagValue.forcePageStart = false;
             break;
+
         case TXN_ELEM_MINER_FEE:
         case V2TXN_ELEM_MINER_FEE:
-            // Miner fees only have one part.
-            memmove(ctx->labelStr, "Miner Fee #", 11);
-            bin2dec(ctx->labelStr + 11, sizeof(ctx->labelStr) - 11, display_index());
+            lastOutputIndex = ctx->lastSiafundOutputIndex;
+            if (lastOutputIndex == USHRT_MAX) {
+                lastOutputIndex = ctx->lastSiacoinOutputIndex;
+            }
+            if (lastOutputIndex == USHRT_MAX) {
+                lastOutputIndex = 0;
+            } else {
+                lastOutputIndex++;
+            }
 
-            const uint8_t valLen =
-                cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
+            // Figure out which element this miner fee is in the element array
+            // from the pairIndex
+            ctx->elementIndex = pairIndex - lastOutputIndex;
+            valLen = cur2dec(ctx->fullStr[0], txn->elements[ctx->elementIndex].outVal);
             formatSC(ctx->fullStr[0], sizeof(ctx->fullStr[0]), valLen);
-
-            ctx->elemPart = 0;
-            ctx->elementIndex++;
+            contentTagValue.item = "Miner Fee Amount (SC)";
+            contentTagValue.value = ctx->fullStr[0];
+            contentTagValue.forcePageStart = true;
             break;
+
         default:
             // This should never happen.
             io_send_sw(SW_DEVELOPER_ERR);
             ui_idle();
             break;
     }
+
+    return &contentTagValue;
 }
 
 static void zero_ctx(void) {
@@ -234,8 +173,10 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
             zero_ctx();
             return SW_INVALID_PARAM;
         }
-        zero_ctx();
+        explicit_bzero(ctx, sizeof(calcTxnHashContext_t));
         ctx->initialized = true;
+        ctx->lastSiacoinOutputIndex = USHRT_MAX;
+        ctx->lastSiafundOutputIndex = USHRT_MAX;
 
         // If this is the first packet, it will include the key index, sig
         // index, and change index in addition to the transaction data. Use
@@ -243,10 +184,10 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
         ctx->keyIndex = U4LE(buffer, 0);  // NOTE: ignored if !ctx->sign
         buffer += 4;
         len -= 4;
-        const uint16_t sigIndex = U2LE(buffer, 0);
+        uint16_t sigIndex = U2LE(buffer, 0);
         buffer += 2;
         len -= 2;
-        const uint32_t changeIndex = U4LE(buffer, 0);
+        uint32_t changeIndex = U4LE(buffer, 0);
         buffer += 4;
         len -= 4;
         if (ins == INS_GET_TXN_HASH) {
@@ -254,6 +195,7 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
         } else {
             v2txn_init(&ctx->txn, sigIndex, changeIndex);
         }
+
         // Set ctx->sign according to P2.
         ctx->sign = (p2 & P2_SIGN_HASH);
 
@@ -274,9 +216,6 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
         v2txn_update(&ctx->txn, buffer, len);
     }
 
-    // Attempt to decode the next element of the transaction. Note that this
-    // code is essentially identical to ui_calcTxnHash_elem_button. Sadly,
-    // there doesn't seem to be a clean way to avoid this duplication.
     switch ((ins == INS_GET_TXN_HASH) ? txn_parse(&ctx->txn) : v2txn_parse(&ctx->txn)) {
         case TXN_STATE_ERR:
             // don't leave state lingering
@@ -284,12 +223,31 @@ uint16_t handleCalcTxnHash(uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *buffer,
             return SW_INVALID_PARAM;
             break;
         case TXN_STATE_PARTIAL:
-            return SW_OK;
+            return SWO_SUCCESS;
             break;
-        case TXN_STATE_FINISHED:
-            fmtTxnElem();
-            ux_flow_init(0, ux_show_txn_elem_flow, NULL);
+        case TXN_STATE_FINISHED: {
+            // Computes the number of pairs to display
+            explicit_bzero(&contentTagValueList, sizeof(contentTagValueList));
+            for (uint16_t i = 0; i < ctx->txn.elementIndex; i++) {
+                const txnElemType_e elemType = ctx->txn.elements[i].elemType;
+                if (elemType == TXN_ELEM_SC_OUTPUT || elemType == V2TXN_ELEM_SC_OUTPUT) {
+                    ctx->lastSiacoinOutputIndex = i;
+                } else if (elemType == TXN_ELEM_SF_OUTPUT || elemType == V2TXN_ELEM_SF_OUTPUT) {
+                    ctx->lastSiafundOutputIndex = i;
+                }
+                contentTagValueList.nbPairs +=
+                    (elemType == TXN_ELEM_MINER_FEE || elemType == V2TXN_ELEM_MINER_FEE) ? 1 : 2;
+            }
+            contentTagValueList.callback = getTagValuePairs;
+            nbgl_useCaseReview(TYPE_TRANSACTION,
+                               &contentTagValueList,
+                               &ICON_APP_SIA,
+                               (ctx->sign) ? "Review Transaction" : "Hash Transaction",
+                               NULL,
+                               (ctx->sign) ? "Sign Transaction" : "Hash Transaction",
+                               confirm_callback);
             break;
+        }
     }
 
     return 0;

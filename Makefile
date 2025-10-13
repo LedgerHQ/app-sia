@@ -19,7 +19,7 @@ ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
 
-include $(BOLOS_SDK)/Makefile.defines
+include $(BOLOS_SDK)/Makefile.target
 
 ########################################
 #        Mandatory configuration       #
@@ -39,10 +39,15 @@ APP_SOURCE_PATH += src
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
 ICON_NANOX = icons/nanox_app_sia.gif
-ICON_NANOSP = icons/nanos2_app_sia.gif
+ICON_NANOSP = icons/nanox_app_sia.gif
 ICON_STAX = icons/stax_app_sia.gif
 ICON_FLEX = icons/flex_app_sia.gif
 ICON_APEX_P = icons/apex_app_sia.png
+
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
+    ICON_HOME_NANO = glyphs/home_sia_14px.gif
+endif
+
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
@@ -85,6 +90,7 @@ VARIANT_VALUES = sia
 ########################################
 ENABLE_BLUETOOTH = 1
 #ENABLE_NFC = 1
+ENABLE_NBGL_FOR_NANO_DEVICES = 1
 
 ########################################
 #         NBGL custom features         #
@@ -104,7 +110,6 @@ ENABLE_BLUETOOTH = 1
 #DISABLE_STANDARD_SNPRINTF = 1
 #DISABLE_STANDARD_USB = 1
 #DISABLE_STANDARD_WEBUSB = 1
-#DISABLE_STANDARD_BAGL_UX_FLOW = 1
 DEFINES += HAVE_LEGACY_PID
 
 include $(BOLOS_SDK)/Makefile.standard_app
