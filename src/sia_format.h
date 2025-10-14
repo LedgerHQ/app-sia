@@ -1,5 +1,4 @@
-#ifndef FORMAT_H
-#define FORMAT_H
+#pragma once
 
 #include <stdint.h>
 
@@ -17,5 +16,3 @@ int bin2dec(char *dst, size_t dstLen, uint64_t n);
 // formatSC converts a decimal string from Hastings to Siacoins. It returns the
 // new length of the string.
 int formatSC(char *buf, size_t bufLen, uint8_t decLen);
-
-#endif /* FORMAT_H */

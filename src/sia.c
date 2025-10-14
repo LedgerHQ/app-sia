@@ -1,13 +1,13 @@
-#include "sia.h"
-
-#include <cx.h>
-#include <ledger_assert.h>
-#include <lib_standard_app/crypto_helpers.h>
-#include <os.h>
-#include <os_seed.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+
+#include "sia.h"
+#include "cx.h"
+#include "ledger_assert.h"
+#include "crypto_helpers.h"
+#include "os.h"
+#include "os_seed.h"
 
 #include "blake2b.h"
 #include "sia_format.h"

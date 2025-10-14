@@ -16,15 +16,15 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include <glyphs.h>
-#include <main_std_app.h>
-#include <os.h>
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <io.h>
-#include <ux.h>
-#include <parser.h>
+#include "main_std_app.h"
+#include "offsets.h"
+#include "os.h"
+#include "os_io_seproxyhal.h"
+#include "io.h"
+#include "ux.h"
+#include "parser.h"
 
 #include "blake2b.h"
 #include "sia.h"
@@ -37,7 +37,6 @@ commandContext global;
 const internalStorage_t N_storage_real;
 
 void ui_idle(void);
-void ui_menu_about(void);
 
 static void update_blind_sign_ui(void);
 
@@ -47,64 +46,9 @@ static void toggle_blind_sign(void) {
     update_blind_sign_ui();
 }
 
-#ifdef HAVE_BAGL
-static char BLIND_SIGNING_MESSAGE[22] = {0};
-
-UX_STEP_NOCB(ux_menu_ready_step, nn, {"Awaiting", "commands"});
-UX_STEP_CB(ux_menu_about_step, pn, ui_menu_about(), {&C_icon_certificate, "About"});
-UX_STEP_VALID(ux_menu_exit_step, pn, app_exit(), {&C_icon_dashboard, "Quit"});
-
-// flow for the main menu:
-// #1 screen: ready
-// #2 screen: about submenu
-// #3 screen: quit
-UX_FLOW(ux_menu_main_flow, &ux_menu_ready_step, &ux_menu_about_step, &ux_menu_exit_step, FLOW_LOOP);
-
-UX_STEP_NOCB(ux_menu_version_step, bn, {"Version", APPVERSION});
-UX_STEP_NOCB(ux_menu_developer_step, bn, {"Developer", APPDEVELOPER});
-UX_STEP_CB(ux_menu_blind_sign_step,
-           pn,
-           toggle_blind_sign(),
-           {&C_icon_certificate, BLIND_SIGNING_MESSAGE});
-UX_STEP_CB(ux_menu_back_step, pb, ui_idle(), {&C_icon_back, "Back"});
-
-// flow for the about submenu:
-// #1 screen: app version
-// #2 screen: blind sign setting
-// #3 screen: back button
-UX_FLOW(ux_menu_about_flow,
-        &ux_menu_version_step,
-        &ux_menu_developer_step,
-        &ux_menu_blind_sign_step,
-        &ux_menu_back_step,
-        FLOW_LOOP);
-
-void ui_idle(void) {
-    if (G_ux.stack_count == 0) {
-        ux_stack_push();
-    }
-
-    ux_flow_init(0, ux_menu_main_flow, NULL);
-}
-
-void ui_menu_about(void) {
-    ux_flow_init(0, ux_menu_about_flow, NULL);
-}
-
-static void update_blind_sign_ui(void) {
-    if (N_storage.blindSign) {
-        memcpy(BLIND_SIGNING_MESSAGE, "Disable blind signing", sizeof(BLIND_SIGNING_MESSAGE));
-    } else {
-        memcpy(BLIND_SIGNING_MESSAGE, "Enable blind signing", sizeof(BLIND_SIGNING_MESSAGE));
-    }
-    ui_idle();
-}
-
-#else
-
 static void controls_callback(int token, uint8_t index, int page);
 
-#define SETTING_INFO_NB     2
+#define SETTING_INFO_NB 2
 static const char *const INFO_TYPES[SETTING_INFO_NB] = {"Version", "Developer"};
 static const char *const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, APPDEVELOPER};
 
@@ -128,8 +72,9 @@ static const nbgl_content_t contents[SETTING_CONTENTS_NB] = {
      .content.switchesList.switches = switches,
      .contentActionCallback = controls_callback}};
 
-static const nbgl_genericContents_t settingContents = {
-    .callbackCallNeeded = false, .contentsList = contents, .nbContents = SETTING_CONTENTS_NB};
+static const nbgl_genericContents_t settingContents = {.callbackCallNeeded = false,
+                                                       .contentsList = contents,
+                                                       .nbContents = SETTING_CONTENTS_NB};
 
 static void controls_callback(int token,
                               uint8_t index __attribute__((unused)),
@@ -149,22 +94,30 @@ void app_quit(void) {
 }
 
 void ui_idle(void) {
+#ifdef SCREEN_SIZE_WALLET
     switches[BLIND_SIGNING_ID].text = "Enable blind signing";
     switches[BLIND_SIGNING_ID].subText = "Recommend only for experienced users";
+#else
+    switches[BLIND_SIGNING_ID].text = "Blind signing";
+#endif
     switches[BLIND_SIGNING_ID].token = BLIND_SIGNING_TOKEN;
+#ifdef HAVE_PIEZO_SOUND
     switches[BLIND_SIGNING_ID].tuneId = TUNE_TAP_CASUAL;
-
+#endif
     nbgl_useCaseHomeAndSettings(APPNAME,
-                                &C_stax_app_sia_big,
+#ifdef SCREEN_SIZE_WALLET
+                                &ICON_APP_SIA,
                                 NULL,
+#else
+                                NULL,
+                                "Awaiting commands",
+#endif
                                 INIT_HOME_PAGE,
                                 &settingContents,
                                 &infoList,
                                 NULL,
                                 app_quit);
 }
-
-#endif
 
 unsigned int io_reject(void) {
     io_send_sw(SW_USER_REJECTED);
@@ -175,8 +128,11 @@ unsigned int io_reject(void) {
 
 // This is the function signature for a command handler.
 // Returns 0 on success.
-typedef uint16_t handler_fn_t(
-    uint8_t ins, uint8_t p1, uint8_t p2, uint8_t *dataBuffer, uint16_t dataLength);
+typedef uint16_t handler_fn_t(uint8_t ins,
+                              uint8_t p1,
+                              uint8_t p2,
+                              uint8_t *dataBuffer,
+                              uint16_t dataLength);
 
 handler_fn_t handleGetVersion;
 handler_fn_t handleGetPublicKey;
@@ -199,18 +155,7 @@ static handler_fn_t *lookupHandler(uint8_t ins) {
     }
 }
 
-// These are the offsets of various parts of a request APDU packet. INS
-// identifies the requested command (see above), and P1 and P2 are parameters
-// to the command.
-#define CLA          0xE0
-#define OFFSET_CLA   0x00
-#define OFFSET_INS   0x01
-#define OFFSET_P1    0x02
-#define OFFSET_P2    0x03
-#define OFFSET_LC    0x04
-#define OFFSET_CDATA 0x05
-
-void send_error_code(uint16_t e) {
+static void send_error_code(uint16_t e) {
     // Convert the exception to a response code. All error codes
     // start with 6, except for 0x9000, which is a special
     // "success" code. Every APDU payload should end with such a
@@ -272,7 +217,7 @@ void app_main() {
         handler_fn_t *handlerFn = lookupHandler(cmd.ins);
         if (!handlerFn) {
             PRINTF("Instruction not supported");
-            send_error_code(SW_INS_NOT_SUPPORTED);
+            send_error_code(SWO_INVALID_INS);
             continue;
         }
 

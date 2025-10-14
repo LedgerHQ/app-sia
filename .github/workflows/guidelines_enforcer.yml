@@ -16,6 +16,10 @@ on:
       - develop
   pull_request:
 
+permissions:
+  contents: read  # Needed for reusable workflows
+  actions: write  # Needed for reusable workflows
+
 jobs:
   guidelines_enforcer:
     name: Call Ledger guidelines_enforcer

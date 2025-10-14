@@ -14,7 +14,7 @@ size_t strlcat(char *dst, const char *src, size_t Size) {
     return ld + ls;
 }
 
-// ignore so we don't crash when failin to generate key for change address
+// ignore so we don't crash when failing to generate key for change address
 // because we mock everything
 void assert_exit(bool confirm __attribute__((unused))) {
     // exit(-1);

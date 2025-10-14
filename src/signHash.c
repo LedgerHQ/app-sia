@@ -17,11 +17,11 @@
 //
 // Keep this description in mind as you read through the implementation.
 
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <io.h>
+#include "os_io_seproxyhal.h"
+#include "io.h"
 
 #include "blake2b.h"
 #include "sia.h"
@@ -32,6 +32,8 @@
 // convenience, so that we can refer to these variables concisely from any
 // signHash-related function.
 static signHashContext_t *ctx = &global.signHashContext;
+static nbgl_contentTagValueList_t tagValueList = {0};
+static nbgl_contentTagValue_t pair = {0};
 
 static unsigned int io_seproxyhal_touch_hash_ok(void) {
     // Derive the secret key and sign the hash, storing the signature in
@@ -39,41 +41,13 @@ static unsigned int io_seproxyhal_touch_hash_ok(void) {
     // encountered; it is defined in sia.c.
     uint8_t signature[64] = {0};
     deriveAndSign(signature, ctx->keyIndex, ctx->hash);
-    io_send_response_pointer(signature, sizeof(signature), SW_OK);
+    io_send_response_pointer(signature, sizeof(signature), SWO_SUCCESS);
     explicit_bzero(signature, sizeof(signature));
 
-#ifdef HAVE_BAGL
-    ui_idle();
-#else
     nbgl_useCaseStatus("HASH SIGNED", true, ui_idle);
-#endif
 
     return 0;
 }
-
-#ifdef HAVE_BAGL
-UX_STEP_NOCB(ux_approve_hash_flow_1_step,
-             bnnn_paging,
-             {"Compare Input:", global.signHashContext.hexHash});
-
-UX_STEP_VALID(ux_approve_hash_flow_2_step,
-              pb,
-              io_seproxyhal_touch_hash_ok(),
-              {&C_icon_validate_14, "Approve"});
-
-UX_STEP_VALID(ux_approve_hash_flow_3_step, pb, io_reject(), {&C_icon_crossmark, "Reject"});
-
-// Flow for the signing hash menu:
-// #1 screen: the hash repeated for confirmation
-// #2 screen: approve
-// #3 screen: reject
-UX_FLOW(ux_approve_hash_flow,
-        &ux_approve_hash_flow_1_step,
-        &ux_approve_hash_flow_2_step,
-        &ux_approve_hash_flow_3_step);
-#else
-
-static nbgl_layoutTagValue_t pair = {0};
 
 static void cancel_review(void) {
     // display a status page and go back to main
@@ -88,8 +62,6 @@ static void confirm_callback(bool confirm) {
         cancel_review();
     }
 }
-
-#endif
 
 uint16_t handleSignHash(uint8_t ins __attribute__((unused)),
                         uint8_t p1 __attribute__((unused)),
@@ -113,26 +85,21 @@ uint16_t handleSignHash(uint8_t ins __attribute__((unused)),
     // Prepare to display the comparison screen by converting the hash to hex
     bin2hex(ctx->hexHash, sizeof(ctx->hexHash), ctx->hash, SIA_HASH_SIZE);
 
-#ifdef HAVE_BAGL
-    ux_flow_init(0, ux_approve_hash_flow, NULL);
-#else
-    snprintf(ctx->typeStr, sizeof(ctx->typeStr), "Sign Hash with Key %d?", ctx->keyIndex);
+    snprintf(ctx->typeStr, sizeof(ctx->typeStr), "Review Hash\nwith Key %d?", ctx->keyIndex);
 
     pair.item = "Hash";
     pair.value = ctx->hexHash;
-
-    nbgl_layoutTagValueList_t tagValueList = {0};
+    explicit_bzero(&tagValueList, sizeof(tagValueList));
     tagValueList.nbPairs = 1;
     tagValueList.pairs = &pair;
 
-    nbgl_useCaseReview(TYPE_MESSAGE,
+    nbgl_useCaseReview(TYPE_OPERATION,
                        &tagValueList,
-                       &C_stax_app_sia_big,
+                       &ICON_APP_SIA,
                        ctx->typeStr,
                        NULL,
                        "Sign hash",
                        confirm_callback);
-#endif
 
     return 0;
 }
