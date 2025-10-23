@@ -14,6 +14,9 @@ on:
       - develop
   pull_request:
 
+permissions:
+  contents: read  # Needed for reusable workflows
+
 jobs:
   check_linting:
     name: Check linting using the reusable workflow
@@ -21,4 +24,3 @@ jobs:
     with:
       source: './src'
       extensions: 'h,c'
-      version: 12

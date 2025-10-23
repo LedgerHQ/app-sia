@@ -1,13 +1,13 @@
-#include <io.h>
-#include <os.h>
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "io.h"
+#include "os.h"
+#include "os_io_seproxyhal.h"
 
 #include "blake2b.h"
 #include "sia.h"
 #include "sia_ux.h"
-#include <buffer.h>
+#include "buffer.h"
 
 // handleGetVersion is the entry point for the getVersion command. It
 // unconditionally sends the app version.
@@ -19,5 +19,5 @@ void handleGetVersion(uint8_t ins __attribute__((unused)),
     static const uint8_t appVersion[3] = {APPVERSION[0] - '0',
                                           APPVERSION[2] - '0',
                                           APPVERSION[4] - '0'};
-    io_send_response_pointer(appVersion, sizeof(appVersion), SW_OK);
+    io_send_response_pointer(appVersion, sizeof(appVersion), SWO_SUCCESS);
 }

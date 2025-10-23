@@ -1,6 +1,5 @@
-#include "format.h"
-
 #include <string.h>
+#include "format.h"
 
 void extractPubkeyBytes(unsigned char *dst, const uint8_t publicKey[static 65]) {
     for (int i = 0; i < 32; i++) {

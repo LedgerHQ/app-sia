@@ -18,13 +18,13 @@
 //
 // Keep this description in mind as you read through the implementation.
 
-#include <os.h>
-#include <io.h>
-#include <os_io_seproxyhal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <buffer.h>
+#include "os.h"
+#include "io.h"
+#include "os_io_seproxyhal.h"
+#include "buffer.h"
 
 #include "blake2b.h"
 #include "sia.h"
@@ -40,36 +40,6 @@
 static getPublicKeyContext_t *ctx = &global.getPublicKeyContext;
 
 static unsigned int process_pubkey(bool send);
-
-#ifdef HAVE_BAGL
-// Allows scrolling through the address/public key
-UX_STEP_CB(ux_compare_pk_flow_1_step,
-           bnnn_paging,
-           ui_idle(),
-           {"Compare", global.getPublicKeyContext.fullStr});
-
-UX_FLOW(ux_compare_pk_flow, &ux_compare_pk_flow_1_step);
-
-UX_STEP_NOCB(ux_approve_pk_flow_1_step,
-             bn,
-             {global.getPublicKeyContext.typeStr, global.getPublicKeyContext.keyStr});
-
-UX_STEP_VALID(ux_approve_pk_flow_2_step,
-              pb,
-              process_pubkey(true),
-              {&C_icon_validate_14, "Approve"});
-
-UX_STEP_VALID(ux_approve_pk_flow_3_step, pb, io_reject(), {&C_icon_crossmark, "Reject"});
-
-// Flow for the public key/address menu:
-// #1 screen: "generate address/public key from key #x?"
-// #2 screen: approve
-// #3 screen: reject
-UX_FLOW(ux_approve_pk_flow,
-        &ux_approve_pk_flow_1_step,
-        &ux_approve_pk_flow_2_step,
-        &ux_approve_pk_flow_3_step);
-#else
 
 static void review_choice(bool confirm) {
     if (confirm) {
@@ -88,7 +58,6 @@ static void review_choice(bool confirm) {
         }
     }
 }
-#endif
 
 static unsigned int process_pubkey(bool send) {
     uint8_t publicKey[65] = {0};
@@ -106,13 +75,10 @@ static unsigned int process_pubkey(bool send) {
         {.ptr = siaAddress, .size = 76, .offset = 0},
     };
     if (send) {
-        io_send_response_buffers(bufs, sizeof(bufs) / sizeof(bufs[0]), SW_OK);
+        io_send_response_buffers(bufs, sizeof(bufs) / sizeof(bufs[0]), SWO_SUCCESS);
     }
 
-// Prepare the comparison screen, filling in the header and body text.
-#ifdef HAVE_BAGL
-    memmove(ctx->typeStr, "Compare:", 9);
-#endif
+    // Prepare the comparison screen, filling in the header and body text.
     if (ctx->genAddr) {
         // The APDU buffer already contains the hex-encoded address, so
         // copy it directly.
@@ -123,9 +89,6 @@ static unsigned int process_pubkey(bool send) {
         bin2hex(ctx->fullStr, sizeof(ctx->fullStr), pubkeyBytes, 32);
     }
 
-#ifdef HAVE_BAGL
-    ux_flow_init(0, ux_compare_pk_flow, NULL);
-#endif
     return 0;
 }
 
@@ -157,17 +120,13 @@ uint16_t handleGetPublicKey(uint8_t ins __attribute__((unused)),
         memmove(ctx->keyStr + 5 + n, "?", 2);
     }
 
-#ifdef HAVE_BAGL
-    ux_flow_init(0, ux_approve_pk_flow, NULL);
-#else
     process_pubkey(false);
     nbgl_useCaseAddressReview(ctx->fullStr,
                               NULL,
-                              &C_stax_app_sia_big,
+                              &ICON_APP_SIA,
                               ctx->typeStr,
                               ctx->keyStr,
                               review_choice);
-#endif
 
     return 0;
 }

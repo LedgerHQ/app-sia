@@ -1,8 +1,7 @@
-#include "blake2b.h"
-
-#include <ledger_assert.h>
 #include <stdint.h>
 #include <string.h>
+#include "blake2b.h"
+#include "ledger_assert.h"
 
 #include "sia.h"
 
