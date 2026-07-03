@@ -15,6 +15,7 @@ on:
 permissions:
   contents: read          # Needed for reusable workflows
   security-events: write  # Needed for reusable workflows
+  actions: read           # Needed for reusable workflows
 
 jobs:
   analyse:
