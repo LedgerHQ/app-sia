@@ -1,8 +1,6 @@
 module sialedger
 
-go 1.23.1
-
-toolchain go1.23.6
+go 1.25.0
 
 replace go.sia.tech/core => /home/christopher/prog/go/src/go.sia.tech/core
 
@@ -13,7 +11,7 @@ require (
 )
 
 require (
-	golang.org/x/crypto v0.39.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	lukechampine.com/frand v1.5.1 // indirect
 )
