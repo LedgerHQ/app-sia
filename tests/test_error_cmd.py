@@ -1,7 +1,5 @@
-from ragger.backend import BackendInterface
-from ragger.backend import RaisePolicy
-
 from application_client.boilerplate_command_sender import CLA, Errors
+from ragger.backend import BackendInterface, RaisePolicy
 
 
 # Ensure the app returns an error when a bad INS is used

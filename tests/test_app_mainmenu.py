@@ -1,6 +1,5 @@
 from ledgered.devices import Device
 from ragger.navigator import Navigator, NavInsID
-
 from utils import ROOT_SCREENSHOT_PATH
 
 
