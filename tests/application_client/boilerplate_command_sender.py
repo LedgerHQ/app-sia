@@ -1,9 +1,8 @@
-from enum import IntEnum
-from typing import Generator, List, Optional
+from collections.abc import Generator
 from contextlib import contextmanager
+from enum import IntEnum
 
-from ragger.backend.interface import BackendInterface, RAPDU
-
+from ragger.backend.interface import RAPDU, BackendInterface
 
 MAX_APDU_LEN: int = 255
 
@@ -57,7 +56,7 @@ class Errors(IntEnum):
     SW_SIGNATURE_FAIL = 0xB008
 
 
-def split_message(message: bytes, max_size: int) -> List[bytes]:
+def split_message(message: bytes, max_size: int) -> list[bytes]:
     return [message[x : x + max_size] for x in range(0, len(message), max_size)]
 
 
@@ -75,9 +74,7 @@ class BoilerplateCommandSender:
         )
 
     def get_version(self) -> RAPDU:
-        return self.backend.exchange(
-            cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START, p2=P2.P2_LAST, data=b""
-        )
+        return self.backend.exchange(cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START, p2=P2.P2_LAST, data=b"")
 
     @contextmanager
     def get_address_with_confirmation(self, index: int) -> Generator[None, None, None]:
@@ -91,9 +88,7 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def get_public_key_with_confirmation(
-        self, index: int
-    ) -> Generator[None, None, None]:
+    def get_public_key_with_confirmation(self, index: int) -> Generator[None, None, None]:
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.GET_PUBLIC_KEY,
@@ -104,9 +99,7 @@ class BoilerplateCommandSender:
             yield response
 
     @contextmanager
-    def sign_hash_with_confirmation(
-        self, index: int, to_sign: bytes
-    ) -> Generator[None, None, None]:
+    def sign_hash_with_confirmation(self, index: int, to_sign: bytes) -> Generator[None, None, None]:
         with self.backend.exchange_async(
             cla=CLA,
             ins=InsType.SIGN_HASH,
@@ -188,5 +181,5 @@ class BoilerplateCommandSender:
         ) as response:
             yield response
 
-    def get_async_response(self) -> Optional[RAPDU]:
+    def get_async_response(self) -> RAPDU | None:
         return self.backend.last_async_response

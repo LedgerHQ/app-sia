@@ -1,8 +1,5 @@
-from typing import List
 import re
-
 from pathlib import Path
-
 
 ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
 
@@ -48,11 +45,11 @@ def util_verify_version(version: str) -> None:
     assert version == vers_str
 
 
-def _read_makefile() -> List[str]:
-    """Read lines from the parent Makefile """
+def _read_makefile() -> list[str]:
+    """Read lines from the parent Makefile"""
 
     parent = Path(__file__).parent.parent.resolve()
     makefile = f"{parent}/Makefile"
-    with open(makefile, "r", encoding="utf-8") as f_p:
+    with open(makefile, encoding="utf-8") as f_p:
         lines = f_p.readlines()
     return lines
