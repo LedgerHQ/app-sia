@@ -6,7 +6,6 @@ from ragger.backend import BackendInterface, RaisePolicy
 from ragger.bip import CurveChoice, calculate_public_key_and_chaincode
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
-
 # Test will ask to generate a public key that will be accepted on screen
 def test_get_public_key_confirm_accepted(backend: BackendInterface, scenario_navigator: NavigateWithScenario):
     client = BoilerplateCommandSender(backend)
