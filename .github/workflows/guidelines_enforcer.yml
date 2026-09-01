@@ -19,7 +19,7 @@ on:
 permissions:
   contents: read  # Needed for reusable workflows
   actions: write  # Needed for reusable workflows
-  pull-requests: write  # Needed for reusable workflows
+  pull-requests: write
 
 jobs:
   guidelines_enforcer:

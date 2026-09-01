@@ -1,18 +1,14 @@
-from ragger.backend import BackendInterface, RaisePolicy
-from ragger.navigator import Navigator, NavIns, NavInsID
-from ragger.navigator.navigation_scenario import NavigateWithScenario
-from ragger.firmware.touch.positions import POSITIONS
-
-from ledgered.devices import Device
 from application_client.boilerplate_command_sender import (
     BoilerplateCommandSender,
     Errors,
 )
+from ledgered.devices import Device
+from ragger.backend import BackendInterface, RaisePolicy
+from ragger.firmware.touch.positions import POSITIONS
+from ragger.navigator import Navigator, NavIns, NavInsID
+from ragger.navigator.navigation_scenario import NavigateWithScenario
 
-
-test_to_sign = bytes.fromhex(
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-)
+test_to_sign = bytes.fromhex("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
 
 def __toggle_setting(device: Device, navigator: Navigator) -> None:
@@ -32,7 +28,7 @@ def __toggle_setting(device: Device, navigator: Navigator) -> None:
         navigator.navigate(
             [
                 NavInsID.USE_CASE_HOME_SETTINGS,
-                NavIns(NavInsID.TOUCH, POSITIONS["ChoiceList"][device.type][1]),
+                NavIns(NavInsID.TOUCH, POSITIONS["ChoiceList"][device.type][1]),  # type: ignore[index]
                 NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
             ],
             screen_change_before_first_instruction=False,
@@ -41,10 +37,7 @@ def __toggle_setting(device: Device, navigator: Navigator) -> None:
 
 # Test will ask to sign a hash that will be accepted on screen
 def test_sign_hash_accept(
-    device: Device,
-    backend: BackendInterface,
-    navigator: Navigator,
-    scenario_navigator: NavigateWithScenario,
+    device: Device, backend: BackendInterface, navigator: Navigator, scenario_navigator: NavigateWithScenario
 ):
     client = BoilerplateCommandSender(backend)
     index = 5
@@ -57,6 +50,7 @@ def test_sign_hash_accept(
         scenario_navigator.review_approve(custom_screen_text="Sign hash")
 
     response = client.get_async_response()
+    assert response is not None
     assert response.status == Errors.SW_OK
     # pylint: disable=line-too-long
     assert response.data == bytes.fromhex(
@@ -67,10 +61,7 @@ def test_sign_hash_accept(
 
 # Test will ask to sign a hash that will be rejected on screen
 def test_sign_hash_reject(
-    device: Device,
-    backend: BackendInterface,
-    navigator: Navigator,
-    scenario_navigator: NavigateWithScenario,
+    device: Device, backend: BackendInterface, navigator: Navigator, scenario_navigator: NavigateWithScenario
 ):
     client = BoilerplateCommandSender(backend)
     index = 5
@@ -84,5 +75,6 @@ def test_sign_hash_reject(
 
     # Assert that we have received a refusal
     response = client.get_async_response()
+    assert response is not None
     assert response.status == Errors.SW_DENY
     assert len(response.data) == 0
